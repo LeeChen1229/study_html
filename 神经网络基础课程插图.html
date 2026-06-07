@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神经网络基础课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #4f63c7;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --accent-4: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(79, 99, 199, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+    .page { width: min(1100px, calc(100vw - 28px)); margin: 0 auto; padding: 28px 0 40px; }
+    .page-title { margin: 0 auto 18px; width: min(860px, 100%); color: #726a5f; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .sheet {
+      position: relative; width: min(860px, 100%); aspect-ratio: 3 / 4; margin: 0 auto 24px; padding: 28px;
+      border-radius: 30px; border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow); overflow: hidden;
+    }
+    .sheet::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%); pointer-events: none; }
+    .sheet-inner { position: relative; z-index: 1; height: 100%; display: grid; gap: 16px; align-content: start; }
+    .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px;
+      border: 1px solid rgba(79, 99, 199, 0.2); background: rgba(79, 99, 199, 0.06);
+      color: var(--accent-1); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-1); box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px; transform: translateY(1px);
+    }
+    .sheet-index { padding-top: 4px; color: #7f786c; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+    h1, h2, h3 { margin: 0; font-family: var(--serif); letter-spacing: -0.03em; }
+    h1 { font-size: clamp(34px, 4.2vw, 56px); line-height: 1.04; margin-top: 6px; }
+    h2 { font-size: 28px; margin-bottom: 2px; }
+    h3 { font-size: 18px; margin-bottom: 8px; }
+    .lead, .card p, .step p, .mini-card span, .poster-note span { margin: 0; color: var(--muted); line-height: 1.72; font-size: 14px; }
+    .hero-grid, .steps-grid, .two-col, .mini-grid, .bottom-grid, .triple-grid, .formula-row { display: grid; gap: 14px; }
+    .hero-grid { grid-template-columns: 1.08fr 0.92fr; }
+    .steps-grid, .formula-row, .triple-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .two-col, .mini-grid, .bottom-grid { grid-template-columns: 1fr 1fr; }
+    .card, .formula, .step, .plot, .mini-card, .poster-note { border-radius: 18px; border: 1px solid rgba(123, 103, 73, 0.12); background: rgba(255,255,255,0.58); padding: 14px 16px; }
+    .formula strong, .mini-card strong, .poster-note strong { display: block; margin-bottom: 8px; font-size: 12px; color: #5d4a34; letter-spacing: 0.05em; text-transform: uppercase; }
+    .formula span { font-family: var(--serif); font-size: 23px; color: #2d2f34; }
+    .step-index-badge { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(79, 99, 199, 0.10); color: var(--accent-1); font-weight: 700; margin-bottom: 10px; }
+    .plot { padding: 12px 12px 10px; }
+    .plot-label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: #6d6458; font-size: 12px; letter-spacing: 0.02em; }
+    canvas { width: 100%; height: 205px; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(123,103,73,0.12); background: rgba(255,255,255,0.56); color: #6b675e; font-size: 13px; }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .flow { display: grid; gap: 12px; }
+    .flow-node { position: relative; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(123, 103, 73, 0.12); background: rgba(255,255,255,0.55); }
+    .flow-node:not(:last-child)::after { content: ""; position: absolute; left: 26px; bottom: -14px; width: 2px; height: 14px; background: linear-gradient(180deg, rgba(79, 99, 199, 0.6), rgba(79, 99, 199, 0.12)); }
+    .flow-node strong { display: block; margin-bottom: 6px; color: #4960b9; font-size: 14px; }
+    .flow-node span { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .poster-note { background: rgba(255, 252, 246, 0.78); }
+    .capture-tip { width: min(860px, 100%); margin: 0 auto; padding: 0 4px 6px; color: #7b7468; font-size: 13px; line-height: 1.7; }
+    .c1 { background: var(--accent-1); } .c2 { background: var(--accent-2); } .c3 { background: var(--accent-3); } .c4 { background: var(--accent-4); }
+    @media (max-width: 900px) {
+      .sheet { aspect-ratio: auto; min-height: auto; }
+      .hero-grid, .steps-grid, .two-col, .mini-grid, .bottom-grid, .formula-row, .triple-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page { width: min(100vw - 18px, 1100px); padding-top: 16px; }
+      .sheet { padding: 20px; border-radius: 24px; }
+      canvas { height: 185px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Neural Network Basics Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+        <div class="hero-grid">
+          <div class="card">
+            <h1>神经网络基础</h1>
+            <p class="lead" style="margin-top: 12px;">
+              神经网络可以看成很多个简单计算单元层层堆叠而成。每个神经元会先做加权求和，再经过非线性激活，最后把结果传给下一层。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个关键词：层、权重、激活函数、反向传播。它之所以强大，不是因为单个神经元复杂，而是因为大量简单单元叠加后可以表示很复杂的映射关系。
+            </p>
+          </div>
+          <div class="flow">
+            <div class="flow-node">
+              <strong>输入层接收特征</strong>
+              <span>原始样本的数值先进入网络，作为第一层输入。</span>
+            </div>
+            <div class="flow-node">
+              <strong>隐藏层逐步变换表示</strong>
+              <span>每层都会学习一种新的表示方式，把原始特征变得更适合预测。</span>
+            </div>
+            <div class="flow-node">
+              <strong>输出层给出预测</strong>
+              <span>回归输出连续值，分类输出概率或类别分数。</span>
+            </div>
+            <div class="flow-node">
+              <strong>反向传播更新参数</strong>
+              <span>损失会告诉网络哪里错了，再把误差信号层层传回去调整权重。</span>
+            </div>
+          </div>
+        </div>
+        <div class="formula-row">
+          <div class="formula"><strong>单元结构</strong><span>w x + b</span></div>
+          <div class="formula"><strong>非线性</strong><span>激活函数</span></div>
+          <div class="formula"><strong>训练方式</strong><span>反向传播</span></div>
+        </div>
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先理解网络结构</h3>
+            <p>它本质上是从输入到输出的一串可学习函数组合。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再理解非线性</h3>
+            <p>没有激活函数，多层线性层叠起来仍然只是线性模型。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后理解训练</h3>
+            <p>通过损失函数和梯度下降，网络参数会逐步朝更好的方向更新。</p>
+          </div>
+        </div>
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>神经网络就是“很多层可学习变换 + 非线性 + 反向传播训练”的组合系统。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>输入层</span>
+            <span><i class="c2"></i>隐藏层</span>
+            <span><i class="c3"></i>输出层</span>
+            <span><i class="c4"></i>误差信号</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Forward Pass</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+        <h2>前向传播在做什么</h2>
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>网络结构图</span><span>输入层 -> 隐藏层 -> 输出层</span></div>
+            <canvas id="networkPlot" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>激活函数作用</span><span>非线性让模型表达更复杂关系</span></div>
+            <canvas id="activationPlot" width="520" height="205"></canvas>
+          </div>
+        </div>
+        <div class="triple-grid">
+          <div class="card">
+            <h3>为什么要加权求和</h3>
+            <p>权重决定每个输入特征的重要程度，偏置则用来整体平移响应位置。</p>
+          </div>
+          <div class="card">
+            <h3>为什么要激活函数</h3>
+            <p>激活函数引入非线性，使网络可以学习弯曲复杂的决策边界，而不仅是直线。</p>
+          </div>
+          <div class="card">
+            <h3>前向传播的目标</h3>
+            <p>把输入一步步变成输出预测，相当于网络对当前参数下的答案进行一次计算。</p>
+          </div>
+        </div>
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>前向传播本质上就是“在当前参数下，网络怎么算出一个预测值”。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Training</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+        <h2>反向传播和训练过程</h2>
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>误差反向传递</span><span>输出层的错误会回传到前面</span></div>
+            <canvas id="backpropPlot" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>训练损失下降</span><span>参数更新后，损失逐步减小</span></div>
+            <canvas id="lossPlot" width="520" height="205"></canvas>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>反向传播做什么</strong>
+            <span>它负责计算每个参数对最终损失的影响大小，也就是梯度。</span>
+          </div>
+          <div class="mini-card">
+            <strong>梯度下降做什么</strong>
+            <span>根据梯度调整参数，让损失朝更小的方向变化。</span>
+          </div>
+          <div class="mini-card">
+            <strong>为什么层数多更强</strong>
+            <span>更深的网络能逐层抽取更复杂的表示，但训练也会更难，需要更好的设计与正则化。</span>
+          </div>
+          <div class="mini-card">
+            <strong>和传统模型的关系</strong>
+            <span>你可以把神经网络看成“更强表达能力的可学习函数族”，它延续了损失、梯度、泛化这些老概念。</span>
+          </div>
+        </div>
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>神经网络的核心闭环是：前向传播得到预测，损失衡量错误，反向传播算梯度，梯度下降更新参数。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+    function drawText(ctx, text, x, y, color) {
+      ctx.save(); ctx.fillStyle = color || "#5f6670"; ctx.font = "13px Segoe UI"; ctx.fillText(text, x, y); ctx.restore();
+    }
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath(); ctx.moveTo(x, margin.top); ctx.lineTo(x, height - margin.bottom); ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(width - margin.right, y); ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath(); ctx.moveTo(margin.left, height - margin.bottom); ctx.lineTo(width - margin.right, height - margin.bottom); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(margin.left, margin.top); ctx.lineTo(margin.left, height - margin.bottom); ctx.stroke();
+      ctx.restore();
+    }
+    function drawNetworkPlot() {
+      const canvas = document.getElementById("networkPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const cols = [
+        [{x:68,y:56},{x:68,y:102},{x:68,y:148}],
+        [{x:180,y:42},{x:180,y:82},{x:180,y:122},{x:180,y:162}],
+        [{x:292,y:56},{x:292,y:102},{x:292,y:148}],
+        [{x:406,y:88},{x:406,y:136}]
+      ];
+      ctx.save();
+      ctx.strokeStyle = "rgba(95,102,112,0.35)";
+      cols.forEach((col, i) => {
+        if (i === cols.length - 1) return;
+        col.forEach((a) => cols[i + 1].forEach((b) => {
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }));
+      });
+      ctx.restore();
+      cols.forEach((col, i) => col.forEach((p) => {
+        ctx.fillStyle = i === 0 ? "#4f63c7" : i === cols.length - 1 ? "#228b5f" : "#cf7b1b";
+        ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, Math.PI * 2); ctx.fill();
+      }));
+      drawText(ctx, "输入", 50, 26, "#4f63c7");
+      drawText(ctx, "隐藏层", 160, 26, "#cf7b1b");
+      drawText(ctx, "隐藏层", 272, 26, "#cf7b1b");
+      drawText(ctx, "输出", 390, 26, "#228b5f");
+    }
+    function drawActivationPlot() {
+      const canvas = document.getElementById("activationPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      ctx.save();
+      ctx.strokeStyle = "#cf7b1b";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 140; i += 1) {
+        const t = -4 + (8 * i) / 140;
+        const x = margin.left + (i / 140) * (width - margin.left - margin.right);
+        const yVal = 1 / (1 + Math.exp(-t));
+        const y = height - margin.bottom - yVal * (height - margin.top - margin.bottom);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+      drawText(ctx, "Sigmoid 把线性结果压成非线性输出", 18, 20, "#cf7b1b");
+    }
+    function drawBackpropPlot() {
+      const canvas = document.getElementById("backpropPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const nodes = [{x:70,y:102},{x:180,y:70},{x:180,y:134},{x:294,y:102},{x:404,y:102}];
+      const arrows = [[0,1],[0,2],[1,3],[2,3],[3,4]];
+      ctx.save();
+      ctx.strokeStyle = "rgba(95,102,112,0.4)";
+      arrows.forEach(([a,b]) => {
+        ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+      });
+      ctx.restore();
+      nodes.forEach((p, i) => {
+        ctx.fillStyle = i === 4 ? "#228b5f" : i === 0 ? "#4f63c7" : "#cf7b1b";
+        ctx.beginPath(); ctx.arc(p.x, p.y, 11, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.save();
+      ctx.strokeStyle = "#b25454";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
+      [[4,3],[3,1],[3,2],[1,0],[2,0]].forEach(([a,b]) => {
+        ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+      });
+      ctx.restore();
+      drawText(ctx, "红色虚线表示误差信号向后传播", 18, 24, "#b25454");
+    }
+    function drawLossPlot() {
+      const canvas = document.getElementById("lossPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      const vals = [0.92,0.81,0.70,0.61,0.53,0.47,0.40,0.34,0.29,0.25];
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      vals.forEach((v, i) => {
+        const x = margin.left + (i / (vals.length - 1)) * (width - margin.left - margin.right);
+        const y = height - margin.bottom - v * (height - margin.top - margin.bottom) * 0.9;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.restore();
+      vals.forEach((v, i) => {
+        const x = margin.left + (i / (vals.length - 1)) * (width - margin.left - margin.right);
+        const y = height - margin.bottom - v * (height - margin.top - margin.bottom) * 0.9;
+        ctx.fillStyle = "#228b5f";
+        ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fill();
+      });
+      drawText(ctx, "训练中损失通常逐步下降", 18, 20, "#228b5f");
+    }
+    function renderAll() {
+      drawNetworkPlot();
+      drawActivationPlot();
+      drawBackpropPlot();
+      drawLossPlot();
+    }
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

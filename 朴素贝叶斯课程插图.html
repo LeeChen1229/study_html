@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>朴素贝叶斯课程插图</title>
+  <style>
+    :root{--paper:#f6f1e7;--ink:#1f2a37;--muted:#617082;--grid:rgba(87,101,122,.12);--a1:#4f63c7;--a2:#cf7b1b;--a3:#228b5f;--a4:#b25454;--shadow:0 18px 48px rgba(73,56,30,.08);--serif:"Georgia","Times New Roman","Songti SC","STSong",serif;--sans:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);background:radial-gradient(circle at top left,rgba(79,99,199,.08),transparent 24%),radial-gradient(circle at top right,rgba(207,123,27,.06),transparent 18%),linear-gradient(180deg,#faf6ef 0%,var(--paper) 100%)} body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:56px 56px;opacity:.55;mask-image:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.45))}
+    .page{width:min(1100px,calc(100vw - 28px));margin:0 auto;padding:28px 0 40px}.page-title{margin:0 auto 18px;width:min(860px,100%);color:#726a5f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    .sheet{position:relative;width:min(860px,100%);aspect-ratio:3/4;margin:0 auto 24px;padding:28px;border-radius:30px;border:1px solid rgba(123,103,73,.18);background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,252,246,.95));box-shadow:var(--shadow);overflow:hidden}
+    .sheet:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 35%);pointer-events:none}.sheet-inner{position:relative;z-index:1;height:100%;display:grid;gap:16px;align-content:start}.sheet-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;border:1px solid rgba(79,99,199,.2);background:rgba(79,99,199,.06);color:var(--a1);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--a1);box-shadow:15px 0 0 var(--a2),30px 0 0 var(--a3);margin-right:32px;transform:translateY(1px)} .sheet-index{padding-top:4px;color:#7f786c;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    h1,h2,h3{margin:0;font-family:var(--serif);letter-spacing:-.03em} h1{font-size:clamp(34px,4.2vw,56px);line-height:1.04;margin-top:6px} h2{font-size:28px} h3{font-size:18px;margin-bottom:8px}
+    .lead,.card p,.step p,.mini span,.note span{margin:0;color:var(--muted);line-height:1.72;font-size:14px}
+    .hero,.steps,.two,.mini-grid,.bottom,.triple,.formula-row{display:grid;gap:14px}.hero{grid-template-columns:1.08fr .92fr}.steps,.formula-row,.triple{grid-template-columns:repeat(3,minmax(0,1fr))}.two,.mini-grid,.bottom{grid-template-columns:1fr 1fr}
+    .card,.formula,.step,.plot,.mini,.note,.flow-node{border-radius:18px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.58);padding:14px 16px}.formula strong,.mini strong,.note strong{display:block;margin-bottom:8px;font-size:12px;color:#5d4a34;letter-spacing:.05em;text-transform:uppercase}.formula span{font-family:var(--serif);font-size:23px;color:#2d2f34}
+    .badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(79,99,199,.1);color:var(--a1);font-weight:700;margin-bottom:10px}.plot{padding:12px 12px 10px}.plot-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;color:#6d6458;font-size:12px}.flow{display:grid;gap:12px}.flow-node{position:relative;background:rgba(255,255,255,.55)}.flow-node:not(:last-child):after{content:"";position:absolute;left:26px;bottom:-14px;width:2px;height:14px;background:linear-gradient(180deg,rgba(79,99,199,.6),rgba(79,99,199,.12))}.flow-node strong{display:block;margin-bottom:6px;color:#4960b9;font-size:14px}.flow-node span{color:var(--muted);font-size:14px;line-height:1.6}
+    .legend{display:flex;flex-wrap:wrap;gap:10px}.legend span{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.56);color:#6b675e;font-size:13px}.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .note{background:rgba(255,252,246,.78)} .tip{width:min(860px,100%);margin:0 auto;padding:0 4px 6px;color:#7b7468;font-size:13px;line-height:1.7} canvas{width:100%;height:205px;display:block}
+    .c1{background:var(--a1)}.c2{background:var(--a2)}.c3{background:var(--a3)}.c4{background:var(--a4)}
+    @media (max-width:900px){.sheet{aspect-ratio:auto}.hero,.steps,.two,.mini-grid,.bottom,.formula-row,.triple{grid-template-columns:1fr}} @media (max-width:640px){.page{width:min(100vw - 18px,1100px);padding-top:16px}.sheet{padding:20px;border-radius:24px}canvas{height:185px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Naive Bayes Cards · 3:4 Poster Notes</div>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Machine Learning Visual Notes</div><div class="sheet-index">Card 01 / 03</div></div>
+      <div class="hero">
+        <div class="card">
+          <h1>朴素贝叶斯</h1>
+          <p class="lead" style="margin-top:12px">朴素贝叶斯是一类基于概率的分类方法。它先问“某个类别本来有多常见”，再问“在这个类别下，当前这些特征出现得像不像”。</p>
+          <p class="lead" style="margin-top:10px">“朴素”指的是它做了一个很强的假设：在已知类别的前提下，各个特征彼此条件独立。这个假设常常不完全真实，但模型仍然经常有效。</p>
+        </div>
+        <div class="flow">
+          <div class="flow-node"><strong>先看先验概率</strong><span>类别本身出现得多不多，比如垃圾邮件原本占多大比例。</span></div>
+          <div class="flow-node"><strong>再看似然</strong><span>如果邮件是垃圾邮件，那么“优惠”“中奖”等词出现的概率大不大。</span></div>
+          <div class="flow-node"><strong>把证据乘起来</strong><span>每个特征都会给某个类别增加或减少支持度。</span></div>
+          <div class="flow-node"><strong>最后选后验最大的类</strong><span>哪个类别在综合所有证据后概率更高，就判给哪个类别。</span></div>
+        </div>
+      </div>
+      <div class="formula-row">
+        <div class="formula"><strong>先验</strong><span>P(y)</span></div>
+        <div class="formula"><strong>似然</strong><span>P(x|y)</span></div>
+        <div class="formula"><strong>目标</strong><span>P(y|x)</span></div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="badge">1</div><h3>先理解“概率投票”</h3><p>不是直接画边界，而是比较每个类别对当前样本的解释能力。</p></div>
+        <div class="step"><div class="badge">2</div><h3>再理解“独立假设”</h3><p>它把复杂联合分布拆成多个单特征概率的乘积。</p></div>
+        <div class="step"><div class="badge">3</div><h3>最后理解“为什么快”</h3><p>参数少、计算简单，特别适合文本分类这类高维稀疏数据。</p></div>
+      </div>
+      <div class="bottom"><div class="note"><strong>一句话记忆</strong><span>朴素贝叶斯就是“先验概率 + 特征证据”的快速概率分类器。</span></div><div class="legend"><span><i class="c1"></i>先验</span><span><i class="c2"></i>似然</span><span><i class="c3"></i>后验</span><span><i class="c4"></i>最终分类</span></div></div>
+    </div></section>
+
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Probabilistic View</div><div class="sheet-index">Card 02 / 03</div></div>
+      <h2>它是怎么做分类的</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>证据累积</span><span>多个特征共同支持某个类别</span></div><canvas id="evidence" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>后验比较</span><span>后验大的类别获胜</span></div><canvas id="posterior" width="520" height="205"></canvas></div>
+      </div>
+      <div class="triple">
+        <div class="card"><h3>为什么适合文本</h3><p>词袋模型下每个词都可以看成一个特征，朴素贝叶斯天然适合把这些词频证据累积起来。</p></div>
+        <div class="card"><h3>为什么常用对数</h3><p>很多小概率相乘会很小，取对数后就能把乘法变成加法，计算更稳定。</p></div>
+        <div class="card"><h3>为什么“朴素”还能有效</h3><p>虽然独立假设粗糙，但只要各类之间的相对比较仍然合理，分类效果就可能很好。</p></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯看起来像在做概率公式推导，本质上是在做一场“每个特征分别给类别投票”的累积比较。</span></div>
+    </div></section>
+
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Strength And Limit</div><div class="sheet-index">Card 03 / 03</div></div>
+      <h2>它为什么简单但有用</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>高维稀疏数据</span><span>文本特征很多时仍然可用</span></div><canvas id="sparse" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>独立假设的代价</span><span>特征强相关时会有偏差</span></div><canvas id="independence" width="520" height="205"></canvas></div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini"><strong>优点</strong><span>训练快、实现简单、对小样本和高维稀疏特征友好。</span></div>
+        <div class="mini"><strong>限制</strong><span>特征强相关时，独立假设会让模型对真实关系表达不足。</span></div>
+        <div class="mini"><strong>常见变体</strong><span>高斯朴素贝叶斯、伯努利朴素贝叶斯、多项式朴素贝叶斯。</span></div>
+        <div class="mini"><strong>适用场景</strong><span>文本分类、情感分析、垃圾邮件过滤等需要快速基线模型的任务。</span></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯不是最复杂的模型，但它经常是一个非常好的概率基线。</span></div>
+    </div></section>
+    <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
+  </div>
+  <script>
+    function setupCanvas(c){const r=window.devicePixelRatio||1,b=c.getBoundingClientRect();c.width=Math.floor(b.width*r);c.height=Math.floor(b.height*r);const x=c.getContext("2d");x.scale(r,r);return{ctx:x,w:b.width,h:b.height}}
+    function grid(ctx,w,h,m){ctx.clearRect(0,0,w,h);ctx.save();ctx.strokeStyle="rgba(96,112,130,.14)";for(let i=0;i<=6;i++){const x=m.l+((w-m.l-m.r)*i)/6;ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,h-m.b);ctx.stroke()}for(let i=0;i<=4;i++){const y=m.t+((h-m.t-m.b)*i)/4;ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke()}ctx.strokeStyle="rgba(31,42,55,.28)";ctx.beginPath();ctx.moveTo(m.l,h-m.b);ctx.lineTo(w-m.r,h-m.b);ctx.stroke();ctx.beginPath();ctx.moveTo(m.l,m.t);ctx.lineTo(m.l,h-m.b);ctx.stroke();ctx.restore()}
+    function txt(ctx,t,x,y,c){ctx.save();ctx.fillStyle=c||"#5f6670";ctx.font="13px Segoe UI";ctx.fillText(t,x,y);ctx.restore()}
+    function bars(id,data,title,color){const {ctx,w,h}=setupCanvas(document.getElementById(id));const m={t:18,r:16,b:26,l:30};grid(ctx,w,h,m);const bw=52;data.forEach((v,i)=>{const x=m.l+28+i*82;const bh=v*(h-m.t-m.b)*.8;ctx.fillStyle=color[i]||"#4f63c7";ctx.globalAlpha=.18;ctx.fillRect(x,h-m.b-bh,bw,bh);ctx.globalAlpha=1;ctx.strokeStyle=color[i]||"#4f63c7";ctx.lineWidth=2;ctx.strokeRect(x,h-m.b-bh,bw,bh)});txt(ctx,title,18,20,color[0]||"#4f63c7")}
+    function evidence(){bars("evidence",[.35,.62,.78],"特征逐个增加支持度",["#4f63c7","#cf7b1b","#228b5f"])}
+    function posterior(){const {ctx,w,h}=setupCanvas(document.getElementById("posterior"));const m={t:18,r:16,b:26,l:30};grid(ctx,w,h,m);const vals=[.42,.78];["正常邮件","垃圾邮件"].forEach((k,i)=>{const x=90+i*140,bh=vals[i]*(h-m.t-m.b)*.8,c=i? "#cf7b1b":"#4f63c7";ctx.fillStyle=c;ctx.globalAlpha=.18;ctx.fillRect(x,h-m.b-bh,70,bh);ctx.globalAlpha=1;ctx.strokeStyle=c;ctx.lineWidth=2;ctx.strokeRect(x,h-m.b-bh,70,bh);txt(ctx,k,x-4,h-m.b+18,c)});txt(ctx,"后验更大的类被选中",18,20,"#cf7b1b")}
+    function sparse(){const {ctx,w,h}=setupCanvas(document.getElementById("sparse"));ctx.clearRect(0,0,w,h);for(let i=0;i<14;i++){for(let j=0;j<8;j++){const x=26+i*28,y=24+j*20;ctx.strokeStyle="rgba(96,112,130,.18)";ctx.strokeRect(x,y,18,12);if((i+j)%5===0||((i*3+j)%11===0)){ctx.fillStyle="#4f63c7";ctx.fillRect(x,y,18,12)}}}txt(ctx,"大多数特征为空，少量特征携带证据",18,18,"#4f63c7")}
+    function independence(){const {ctx,w,h}=setupCanvas(document.getElementById("independence"));ctx.clearRect(0,0,w,h);ctx.strokeStyle="#b25454";ctx.lineWidth=2;ctx.beginPath();ctx.arc(172,102,54,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(222,102,54,0,Math.PI*2);ctx.stroke();ctx.fillStyle="rgba(178,84,84,.15)";ctx.beginPath();ctx.arc(172,102,54,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(222,102,54,0,Math.PI*2);ctx.fill();txt(ctx,"特征如果高度相关，独立假设会失真",18,20,"#b25454")}
+    function render(){evidence();posterior();sparse();independence()} window.addEventListener("load",render);window.addEventListener("resize",render);
+  </script>
+</body>
+</html>

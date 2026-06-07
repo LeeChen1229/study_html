@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boosting 与 XGBoost 课程插图</title>
+  <style>
+    :root{--paper:#f6f1e7;--ink:#1f2a37;--muted:#617082;--grid:rgba(87,101,122,.12);--a1:#4f63c7;--a2:#cf7b1b;--a3:#228b5f;--a4:#b25454;--shadow:0 18px 48px rgba(73,56,30,.08);--serif:"Georgia","Times New Roman","Songti SC","STSong",serif;--sans:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);background:radial-gradient(circle at top left,rgba(79,99,199,.08),transparent 24%),radial-gradient(circle at top right,rgba(207,123,27,.06),transparent 18%),linear-gradient(180deg,#faf6ef 0%,var(--paper) 100%)} body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:56px 56px;opacity:.55;mask-image:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.45))}
+    .page{width:min(1100px,calc(100vw - 28px));margin:0 auto;padding:28px 0 40px}.page-title{margin:0 auto 18px;width:min(860px,100%);color:#726a5f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    .sheet{position:relative;width:min(860px,100%);aspect-ratio:3/4;margin:0 auto 24px;padding:28px;border-radius:30px;border:1px solid rgba(123,103,73,.18);background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,252,246,.95));box-shadow:var(--shadow);overflow:hidden}
+    .sheet:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 35%);pointer-events:none}.sheet-inner{position:relative;z-index:1;height:100%;display:grid;gap:16px;align-content:start}.sheet-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;border:1px solid rgba(79,99,199,.2);background:rgba(79,99,199,.06);color:var(--a1);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--a1);box-shadow:15px 0 0 var(--a2),30px 0 0 var(--a3);margin-right:32px;transform:translateY(1px)} .sheet-index{padding-top:4px;color:#7f786c;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    h1,h2,h3{margin:0;font-family:var(--serif);letter-spacing:-.03em} h1{font-size:clamp(34px,4.2vw,56px);line-height:1.04;margin-top:6px} h2{font-size:28px} h3{font-size:18px;margin-bottom:8px}
+    .lead,.card p,.step p,.mini span,.note span{margin:0;color:var(--muted);line-height:1.72;font-size:14px}
+    .hero,.steps,.two,.mini-grid,.bottom,.triple,.formula-row{display:grid;gap:14px}.hero{grid-template-columns:1.08fr .92fr}.steps,.formula-row,.triple{grid-template-columns:repeat(3,minmax(0,1fr))}.two,.mini-grid,.bottom{grid-template-columns:1fr 1fr}
+    .card,.formula,.step,.plot,.mini,.note,.flow-node{border-radius:18px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.58);padding:14px 16px}.formula strong,.mini strong,.note strong{display:block;margin-bottom:8px;font-size:12px;color:#5d4a34;letter-spacing:.05em;text-transform:uppercase}.formula span{font-family:var(--serif);font-size:23px;color:#2d2f34}
+    .badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(79,99,199,.1);color:var(--a1);font-weight:700;margin-bottom:10px}.plot{padding:12px 12px 10px}.plot-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;color:#6d6458;font-size:12px}.flow{display:grid;gap:12px}.flow-node{position:relative;background:rgba(255,255,255,.55)}.flow-node:not(:last-child):after{content:"";position:absolute;left:26px;bottom:-14px;width:2px;height:14px;background:linear-gradient(180deg,rgba(79,99,199,.6),rgba(79,99,199,.12))}.flow-node strong{display:block;margin-bottom:6px;color:#4960b9;font-size:14px}.flow-node span{color:var(--muted);font-size:14px;line-height:1.6}
+    .legend{display:flex;flex-wrap:wrap;gap:10px}.legend span{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.56);color:#6b675e;font-size:13px}.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .note{background:rgba(255,252,246,.78)} .tip{width:min(860px,100%);margin:0 auto;padding:0 4px 6px;color:#7b7468;font-size:13px;line-height:1.7} canvas{width:100%;height:205px;display:block}
+    .c1{background:var(--a1)}.c2{background:var(--a2)}.c3{background:var(--a3)}.c4{background:var(--a4)}
+    @media (max-width:900px){.sheet{aspect-ratio:auto}.hero,.steps,.two,.mini-grid,.bottom,.formula-row,.triple{grid-template-columns:1fr}} @media (max-width:640px){.page{width:min(100vw - 18px,1100px);padding-top:16px}.sheet{padding:20px;border-radius:24px}canvas{height:185px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Boosting And XGBoost Cards · 3:4 Poster Notes</div>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Machine Learning Visual Notes</div><div class="sheet-index">Card 01 / 03</div></div>
+      <div class="hero">
+        <div class="card">
+          <h1>Boosting 与 XGBoost</h1>
+          <p class="lead" style="margin-top:12px">Boosting 的核心思想是“不要一次做一个完美模型，而是让很多个弱模型按顺序接力，每一步专门修正前一步的错误”。</p>
+          <p class="lead" style="margin-top:10px">`AdaBoost` 更强调给难样本更高权重，`GBDT` 更像一轮轮去拟合残差，`XGBoost` 则是在梯度提升树基础上把正则化、二阶信息和工程效率做得更强。</p>
+        </div>
+        <div class="flow">
+          <div class="flow-node"><strong>先训练一个弱学习器</strong><span>第一棵树往往很简单，只能抓住最粗的模式。</span></div>
+          <div class="flow-node"><strong>再关注前一步的错误</strong><span>新的学习器不再重复前一步，而是去补它没做好的地方。</span></div>
+          <div class="flow-node"><strong>逐步叠加多个学习器</strong><span>每一步都修正一点，整体模型就会越来越强。</span></div>
+          <div class="flow-node"><strong>最终得到强模型</strong><span>很多个弱规则按顺序叠加，能形成很强的非线性表达能力。</span></div>
+        </div>
+      </div>
+      <div class="formula-row">
+        <div class="formula"><strong>方式</strong><span>顺序学习</span></div>
+        <div class="formula"><strong>目标</strong><span>修正误差</span></div>
+        <div class="formula"><strong>结果</strong><span>弱变强</span></div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="badge">1</div><h3>先理解接力</h3><p>Boosting 不是并行投票，而是前一个做完后，后一个专门补它的不足。</p></div>
+        <div class="step"><div class="badge">2</div><h3>再理解残差</h3><p>在 GBDT 里，每一棵新树都在逼近“当前还没解释好的部分”。</p></div>
+        <div class="step"><div class="badge">3</div><h3>最后理解 XGBoost</h3><p>它是更工程化、更稳健的梯度提升树实现。</p></div>
+      </div>
+      <div class="bottom"><div class="note"><strong>一句话记忆</strong><span>Boosting 就是让多个弱模型按顺序修错，最后拼成一个强模型。</span></div><div class="legend"><span><i class="c1"></i>初始模型</span><span><i class="c2"></i>误差</span><span><i class="c3"></i>新增树</span><span><i class="c4"></i>最终模型</span></div></div>
+    </div></section>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Sequential Learning</div><div class="sheet-index">Card 02 / 03</div></div>
+      <h2>它为什么和随机森林不同</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>随机森林</span><span>多棵树并行投票</span></div><canvas id="parallel" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>Boosting</span><span>多棵树顺序修错</span></div><canvas id="sequential" width="520" height="205"></canvas></div>
+      </div>
+      <div class="triple">
+        <div class="card"><h3>随机森林更像集体表决</h3><p>多棵树独立训练，最后再投票或平均，重点是降低方差、提高稳定性。</p></div>
+        <div class="card"><h3>Boosting 更像逐步改卷</h3><p>后一棵树总是在看前面哪里错了，所以重点是逐步降低偏差。</p></div>
+        <div class="card"><h3>为什么效果常常更强</h3><p>因为它把模型能力集中用在“最难学的部分”，往往能学出更精细的边界。</p></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>随机森林和 Boosting 都是树集成，但一个偏“并行稳健”，一个偏“顺序修正”。</span></div>
+    </div></section>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">XGBoost</div><div class="sheet-index">Card 03 / 03</div></div>
+      <h2>XGBoost 为什么这么常见</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>残差逐步变小</span><span>新树持续修正旧树错误</span></div><canvas id="residual" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>复杂度控制</span><span>正则化让树不要长得过度</span></div><canvas id="regularize" width="520" height="205"></canvas></div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini"><strong>强项</strong><span>结构化表格数据上效果常常很强，而且训练效率高。</span></div>
+        <div class="mini"><strong>关键优化</strong><span>正则化、二阶梯度、缺失值处理、并行化和剪枝策略。</span></div>
+        <div class="mini"><strong>限制</strong><span>参数较多，需要调参；对纯图像、语音这类原始高维感知数据不如深度网络自然。</span></div>
+        <div class="mini"><strong>适用场景</strong><span>比赛、风控、推荐、广告和结构化业务数据建模。</span></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>XGBoost 之所以流行，不只是因为“树多”，而是因为它把 Boosting 做成了一套兼顾效果和工程效率的强工具。</span></div>
+    </div></section>
+    <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
+  </div>
+  <script>
+    function setupCanvas(c){const r=window.devicePixelRatio||1,b=c.getBoundingClientRect();c.width=Math.floor(b.width*r);c.height=Math.floor(b.height*r);const x=c.getContext("2d");x.scale(r,r);return{ctx:x,w:b.width,h:b.height}}
+    function txt(ctx,t,x,y,c){ctx.save();ctx.fillStyle=c||"#5f6670";ctx.font="13px Segoe UI";ctx.fillText(t,x,y);ctx.restore()}
+    function parallel(){const {ctx,w,h}=setupCanvas(document.getElementById("parallel"));ctx.clearRect(0,0,w,h);[86,186,286].forEach((x,i)=>{ctx.strokeStyle=["#4f63c7","#cf7b1b","#228b5f"][i];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,38);ctx.lineTo(x-32,92);ctx.lineTo(x+32,92);ctx.closePath();ctx.stroke();ctx.beginPath();ctx.moveTo(x,104);ctx.lineTo(x-24,150);ctx.lineTo(x+24,150);ctx.closePath();ctx.stroke();});ctx.strokeStyle="#b25454";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(372,60);ctx.lineTo(372,152);ctx.stroke();txt(ctx,"并行训练，多树一起投票",18,20,"#4f63c7")}
+    function sequential(){const {ctx,w,h}=setupCanvas(document.getElementById("sequential"));ctx.clearRect(0,0,w,h);const xs=[76,190,304];xs.forEach((x,i)=>{ctx.strokeStyle=["#4f63c7","#cf7b1b","#228b5f"][i];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,50);ctx.lineTo(x-28,94);ctx.lineTo(x+28,94);ctx.closePath();ctx.stroke();if(i<2){ctx.strokeStyle="#b25454";ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(x+34,74);ctx.lineTo(xs[i+1]-34,74);ctx.stroke();ctx.setLineDash([])}});txt(ctx,"顺序训练，后一棵树补前一棵树的错",18,20,"#cf7b1b")}
+    function residual(){const {ctx,w,h}=setupCanvas(document.getElementById("residual"));ctx.clearRect(0,0,w,h);const vals=[88,62,40,24];vals.forEach((v,i)=>{const x=48+i*92,c=["#4f63c7","#cf7b1b","#228b5f","#b25454"][i];ctx.fillStyle=c;ctx.globalAlpha=.18;ctx.fillRect(x,170-v,54,v);ctx.globalAlpha=1;ctx.strokeStyle=c;ctx.lineWidth=2;ctx.strokeRect(x,170-v,54,v);txt(ctx,"树"+(i+1),x+10,188,c)});txt(ctx,"每加一棵树，剩余误差继续下降",18,20,"#228b5f")}
+    function regularize(){const {ctx,w,h}=setupCanvas(document.getElementById("regularize"));ctx.clearRect(0,0,w,h);ctx.strokeStyle="#b25454";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(28,154);ctx.bezierCurveTo(86,24,140,188,198,52);ctx.bezierCurveTo(250,4,310,178,382,64);ctx.stroke();ctx.strokeStyle="#228b5f";ctx.beginPath();ctx.moveTo(28,136);ctx.bezierCurveTo(120,68,220,98,382,82);ctx.stroke();txt(ctx,"正则化让模型更平滑，避免过拟合",18,20,"#b25454")}
+    function render(){parallel();sequential();residual();regularize()} window.addEventListener("load",render);window.addEventListener("resize",render);
+  </script>
+</body>
+</html>

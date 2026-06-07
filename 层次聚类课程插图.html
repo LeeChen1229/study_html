@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>层次聚类课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #4f63c7;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --accent-4: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(79, 99, 199, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+    .page { width: min(1100px, calc(100vw - 28px)); margin: 0 auto; padding: 28px 0 40px; }
+    .page-title { margin: 0 auto 18px; width: min(860px, 100%); color: #726a5f; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .sheet {
+      position: relative; width: min(860px, 100%); aspect-ratio: 3 / 4; margin: 0 auto 24px; padding: 28px;
+      border-radius: 30px; border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow); overflow: hidden;
+    }
+    .sheet::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%); pointer-events: none; }
+    .sheet-inner { position: relative; z-index: 1; height: 100%; display: grid; gap: 16px; align-content: start; }
+    .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px;
+      border: 1px solid rgba(79, 99, 199, 0.2); background: rgba(79, 99, 199, 0.06);
+      color: var(--accent-1); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-1); box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px; transform: translateY(1px);
+    }
+    .sheet-index { padding-top: 4px; color: #7f786c; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+    h1, h2, h3 { margin: 0; font-family: var(--serif); letter-spacing: -0.03em; }
+    h1 { font-size: clamp(34px, 4.2vw, 56px); line-height: 1.04; margin-top: 6px; }
+    h2 { font-size: 28px; margin-bottom: 2px; }
+    h3 { font-size: 18px; margin-bottom: 8px; }
+    .lead, .card p, .step p, .mini-card span, .poster-note span { margin: 0; color: var(--muted); line-height: 1.72; font-size: 14px; }
+    .hero-grid, .steps-grid, .two-col, .mini-grid, .bottom-grid, .triple-grid, .formula-row { display: grid; gap: 14px; }
+    .hero-grid { grid-template-columns: 1.08fr 0.92fr; }
+    .steps-grid, .formula-row, .triple-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .two-col, .mini-grid, .bottom-grid { grid-template-columns: 1fr 1fr; }
+    .card, .formula, .step, .plot, .mini-card, .poster-note {
+      border-radius: 18px; border: 1px solid rgba(123, 103, 73, 0.12); background: rgba(255,255,255,0.58); padding: 14px 16px;
+    }
+    .formula strong, .mini-card strong, .poster-note strong { display: block; margin-bottom: 8px; font-size: 12px; color: #5d4a34; letter-spacing: 0.05em; text-transform: uppercase; }
+    .formula span { font-family: var(--serif); font-size: 23px; color: #2d2f34; }
+    .step-index-badge {
+      display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(79, 99, 199, 0.10); color: var(--accent-1); font-weight: 700; margin-bottom: 10px;
+    }
+    .plot { padding: 12px 12px 10px; }
+    .plot-label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: #6d6458; font-size: 12px; letter-spacing: 0.02em; }
+    canvas { width: 100%; height: 205px; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+    .legend span {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12); background: rgba(255,255,255,0.56); color: #6b675e; font-size: 13px;
+    }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .flow { display: grid; gap: 12px; }
+    .flow-node {
+      position: relative; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(123, 103, 73, 0.12); background: rgba(255,255,255,0.55);
+    }
+    .flow-node:not(:last-child)::after {
+      content: ""; position: absolute; left: 26px; bottom: -14px; width: 2px; height: 14px;
+      background: linear-gradient(180deg, rgba(79, 99, 199, 0.6), rgba(79, 99, 199, 0.12));
+    }
+    .flow-node strong { display: block; margin-bottom: 6px; color: #4960b9; font-size: 14px; }
+    .flow-node span { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .poster-note { background: rgba(255, 252, 246, 0.78); }
+    .capture-tip { width: min(860px, 100%); margin: 0 auto; padding: 0 4px 6px; color: #7b7468; font-size: 13px; line-height: 1.7; }
+    .c1 { background: var(--accent-1); } .c2 { background: var(--accent-2); } .c3 { background: var(--accent-3); } .c4 { background: var(--accent-4); }
+    @media (max-width: 900px) {
+      .sheet { aspect-ratio: auto; min-height: auto; }
+      .hero-grid, .steps-grid, .two-col, .mini-grid, .bottom-grid, .formula-row, .triple-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page { width: min(100vw - 18px, 1100px); padding-top: 16px; }
+      .sheet { padding: 20px; border-radius: 24px; }
+      canvas { height: 185px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Hierarchical Clustering Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+        <div class="hero-grid">
+          <div class="card">
+            <h1>层次聚类</h1>
+            <p class="lead" style="margin-top: 12px;">
+              层次聚类的思路不是一次性把所有样本分好，而是先从“每个点各自为类”开始，再把最相近的类一步步合并，最终形成一棵树状结构。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个关键词：相似度、逐步合并、树状图、切分高度。它最大的特点是，聚类结果不是只有一个，而是可以通过在不同高度“剪树”得到不同粒度的分组。
+            </p>
+          </div>
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先把每个样本看成一类</strong>
+              <span>起点时类的数量最多，每个点都单独存在。</span>
+            </div>
+            <div class="flow-node">
+              <strong>不断合并最近的两类</strong>
+              <span>每一步都找当前最相似的两个簇，把它们并起来。</span>
+            </div>
+            <div class="flow-node">
+              <strong>记录合并过程</strong>
+              <span>所有合并都会形成一棵树，横向表示样本，纵向表示合并距离。</span>
+            </div>
+            <div class="flow-node">
+              <strong>最后按高度剪树</strong>
+              <span>想要几类，不是提前指定，而是通过切割树状图来决定。</span>
+            </div>
+          </div>
+        </div>
+        <div class="formula-row">
+          <div class="formula"><strong>起点</strong><span>每点一类</span></div>
+          <div class="formula"><strong>过程</strong><span>逐步合并</span></div>
+          <div class="formula"><strong>结果</strong><span>树状图</span></div>
+        </div>
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先理解“层次”</h3>
+            <p>聚类结果不是平面的，而是分层的，从细到粗都能看到。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再理解“距离”</h3>
+            <p>谁先合并，本质上取决于你如何定义点与点、类与类之间的距离。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后理解“剪树”</h3>
+            <p>树剪得越低，簇越多；树剪得越高，簇越粗。</p>
+          </div>
+        </div>
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>层次聚类不是先规定几个簇，而是先把样本关系搭成一棵树，再从树上选择你想要的分组层级。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>样本</span>
+            <span><i class="c2"></i>早期合并</span>
+            <span><i class="c3"></i>后期合并</span>
+            <span><i class="c4"></i>切分高度</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Merge Process</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+        <h2>它是怎么一步步合并的</h2>
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>样本空间</span><span>相近样本会优先合并</span></div>
+            <canvas id="mergePoints" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>树状图</span><span>纵向越高，说明合并距离越大</span></div>
+            <canvas id="dendrogram" width="520" height="205"></canvas>
+          </div>
+        </div>
+        <div class="triple-grid">
+          <div class="card">
+            <h3>为什么先合并近邻</h3>
+            <p>如果两个点或两个簇非常相似，它们通常应先组成更小、更细的局部簇。</p>
+          </div>
+          <div class="card">
+            <h3>树状图怎么看</h3>
+            <p>横向是样本顺序，纵向是合并距离；越靠下连接，说明越早、越相似。</p>
+          </div>
+          <div class="card">
+            <h3>链接方式会影响结果</h3>
+            <p>单链接、全链接、平均链接都会改变“簇与簇距离”的定义，从而改变树的形状。</p>
+          </div>
+        </div>
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>理解层次聚类时，一定要把“平面中的点”与“右侧的树状图”对应起来看，树其实是在记录谁先和谁抱团。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Cutting Tree</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+        <h2>树剪在不同高度，会得到不同簇</h2>
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>低位切分</span><span>保留更多细粒度簇</span></div>
+            <canvas id="cutLow" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>高位切分</span><span>得到更粗的聚类结果</span></div>
+            <canvas id="cutHigh" width="520" height="205"></canvas>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>优点</strong>
+            <span>不需要一开始指定簇数，能看到不同层级的结构，适合探索性分析。</span>
+          </div>
+          <div class="mini-card">
+            <strong>限制</strong>
+            <span>样本很多时计算和存储开销会明显上升，且一旦合并就不会回退。</span>
+          </div>
+          <div class="mini-card">
+            <strong>和 K-Means 的区别</strong>
+            <span>K-Means 直接给出一个固定分组；层次聚类更像给出一整套分组家谱。</span>
+          </div>
+          <div class="mini-card">
+            <strong>适用场景</strong>
+            <span>当你想先观察数据内部结构，而不是一开始就锁定簇数时，层次聚类很有价值。</span>
+          </div>
+        </div>
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>层次聚类真正有价值的地方，不只是“分成几类”，而是它能把数据的层级结构完整保留下来。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath(); ctx.moveTo(x, margin.top); ctx.lineTo(x, height - margin.bottom); ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(width - margin.right, y); ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath(); ctx.moveTo(margin.left, height - margin.bottom); ctx.lineTo(width - margin.right, height - margin.bottom); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(margin.left, margin.top); ctx.lineTo(margin.left, height - margin.bottom); ctx.stroke();
+      ctx.restore();
+    }
+    function drawText(ctx, text, x, y, color) {
+      ctx.save(); ctx.fillStyle = color || "#5f6670"; ctx.font = "13px Segoe UI"; ctx.fillText(text, x, y); ctx.restore();
+    }
+    function mapPoint(u, v, width, height, margin) {
+      return { x: margin.left + u * (width - margin.left - margin.right), y: height - margin.bottom - v * (height - margin.top - margin.bottom) };
+    }
+    const pts = [[0.16,0.22],[0.22,0.28],[0.30,0.26],[0.55,0.62],[0.60,0.70],[0.68,0.66],[0.82,0.32],[0.88,0.38]];
+    function drawMergePoints() {
+      const canvas = document.getElementById("mergePoints");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      const colors = ["#4f63c7","#4f63c7","#4f63c7","#cf7b1b","#cf7b1b","#cf7b1b","#228b5f","#228b5f"];
+      pts.forEach(([u,v], i) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.fillStyle = colors[i];
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2); ctx.fill();
+      });
+      const links = [[0,1],[1,2],[3,4],[4,5],[6,7]];
+      ctx.save(); ctx.strokeStyle = "rgba(95,102,112,0.5)"; ctx.lineWidth = 1.6;
+      links.forEach(([a,b]) => {
+        const p1 = mapPoint(pts[a][0], pts[a][1], width, height, margin);
+        const p2 = mapPoint(pts[b][0], pts[b][1], width, height, margin);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      });
+      ctx.restore();
+      drawText(ctx, "近邻会优先形成小簇", 18, 20, "#4f63c7");
+    }
+    function drawDendrogramBase(canvasId, cutY) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+      const xs = [42, 82, 122, 192, 232, 272, 342, 382];
+      const baseY = 170;
+      ctx.strokeStyle = "rgba(31,42,55,0.28)";
+      ctx.beginPath(); ctx.moveTo(24, baseY); ctx.lineTo(width - 20, baseY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(30, 18); ctx.lineTo(30, baseY); ctx.stroke();
+      const join = (x1, x2, y) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, baseY); ctx.lineTo(x1, y); ctx.lineTo(x2, y); ctx.lineTo(x2, baseY);
+        ctx.stroke();
+      };
+      ctx.strokeStyle = "#4f63c7"; ctx.lineWidth = 2;
+      join(xs[0], xs[1], 132); join(xs[0] + 20, xs[2], 118);
+      ctx.strokeStyle = "#cf7b1b";
+      join(xs[3], xs[4], 126); join(xs[3] + 20, xs[5], 110);
+      ctx.strokeStyle = "#228b5f";
+      join(xs[6], xs[7], 124);
+      ctx.strokeStyle = "#b25454";
+      ctx.beginPath();
+      ctx.moveTo(82, 118); ctx.lineTo(82, 82); ctx.lineTo(232, 82); ctx.lineTo(232, 110);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(157, 82); ctx.lineTo(157, 48); ctx.lineTo(362, 48); ctx.lineTo(362, 124);
+      ctx.stroke();
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = "#b25454";
+      ctx.beginPath(); ctx.moveTo(24, cutY); ctx.lineTo(width - 20, cutY); ctx.stroke();
+      ctx.setLineDash([]);
+      drawText(ctx, "切分线", width - 72, cutY - 8, "#b25454");
+    }
+    function drawDendrogram() { drawDendrogramBase("dendrogram", 96); }
+    function drawCutLow() { drawDendrogramBase("cutLow", 108); }
+    function drawCutHigh() { drawDendrogramBase("cutHigh", 66); }
+    function renderAll() {
+      drawMergePoints();
+      drawDendrogram();
+      drawCutLow();
+      drawCutHigh();
+    }
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

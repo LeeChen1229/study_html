@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>卷积神经网络 CNN 课程插图</title>
+  <style>
+    :root{--paper:#f6f1e7;--ink:#1f2a37;--muted:#617082;--grid:rgba(87,101,122,.12);--a1:#4f63c7;--a2:#cf7b1b;--a3:#228b5f;--a4:#b25454;--shadow:0 18px 48px rgba(73,56,30,.08);--serif:"Georgia","Times New Roman","Songti SC","STSong",serif;--sans:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--sans);background:radial-gradient(circle at top left,rgba(79,99,199,.08),transparent 24%),radial-gradient(circle at top right,rgba(207,123,27,.06),transparent 18%),linear-gradient(180deg,#faf6ef 0%,var(--paper) 100%)} body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:56px 56px;opacity:.55;mask-image:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.45))}
+    .page{width:min(1100px,calc(100vw - 28px));margin:0 auto;padding:28px 0 40px}.page-title{margin:0 auto 18px;width:min(860px,100%);color:#726a5f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    .sheet{position:relative;width:min(860px,100%);aspect-ratio:3/4;margin:0 auto 24px;padding:28px;border-radius:30px;border:1px solid rgba(123,103,73,.18);background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,252,246,.95));box-shadow:var(--shadow);overflow:hidden}
+    .sheet:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 35%);pointer-events:none}.sheet-inner{position:relative;z-index:1;height:100%;display:grid;gap:16px;align-content:start}.sheet-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;border:1px solid rgba(79,99,199,.2);background:rgba(79,99,199,.06);color:var(--a1);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--a1);box-shadow:15px 0 0 var(--a2),30px 0 0 var(--a3);margin-right:32px;transform:translateY(1px)} .sheet-index{padding-top:4px;color:#7f786c;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    h1,h2,h3{margin:0;font-family:var(--serif);letter-spacing:-.03em} h1{font-size:clamp(34px,4.2vw,56px);line-height:1.04;margin-top:6px} h2{font-size:28px} h3{font-size:18px;margin-bottom:8px}
+    .lead,.card p,.step p,.mini span,.note span{margin:0;color:var(--muted);line-height:1.72;font-size:14px}
+    .hero,.steps,.two,.mini-grid,.bottom,.triple,.formula-row{display:grid;gap:14px}.hero{grid-template-columns:1.08fr .92fr}.steps,.formula-row,.triple{grid-template-columns:repeat(3,minmax(0,1fr))}.two,.mini-grid,.bottom{grid-template-columns:1fr 1fr}
+    .card,.formula,.step,.plot,.mini,.note,.flow-node{border-radius:18px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.58);padding:14px 16px}.formula strong,.mini strong,.note strong{display:block;margin-bottom:8px;font-size:12px;color:#5d4a34;letter-spacing:.05em;text-transform:uppercase}.formula span{font-family:var(--serif);font-size:23px;color:#2d2f34}
+    .badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(79,99,199,.1);color:var(--a1);font-weight:700;margin-bottom:10px}.plot{padding:12px 12px 10px}.plot-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;color:#6d6458;font-size:12px}.flow{display:grid;gap:12px}.flow-node{position:relative;background:rgba(255,255,255,.55)}.flow-node:not(:last-child):after{content:"";position:absolute;left:26px;bottom:-14px;width:2px;height:14px;background:linear-gradient(180deg,rgba(79,99,199,.6),rgba(79,99,199,.12))}.flow-node strong{display:block;margin-bottom:6px;color:#4960b9;font-size:14px}.flow-node span{color:var(--muted);font-size:14px;line-height:1.6}
+    .legend{display:flex;flex-wrap:wrap;gap:10px}.legend span{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(123,103,73,.12);background:rgba(255,255,255,.56);color:#6b675e;font-size:13px}.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .note{background:rgba(255,252,246,.78)} .tip{width:min(860px,100%);margin:0 auto;padding:0 4px 6px;color:#7b7468;font-size:13px;line-height:1.7} canvas{width:100%;height:205px;display:block}
+    .c1{background:var(--a1)}.c2{background:var(--a2)}.c3{background:var(--a3)}.c4{background:var(--a4)}
+    @media (max-width:900px){.sheet{aspect-ratio:auto}.hero,.steps,.two,.mini-grid,.bottom,.formula-row,.triple{grid-template-columns:1fr}} @media (max-width:640px){.page{width:min(100vw - 18px,1100px);padding-top:16px}.sheet{padding:20px;border-radius:24px}canvas{height:185px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">CNN Cards · 3:4 Poster Notes</div>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Deep Learning Visual Notes</div><div class="sheet-index">Card 01 / 03</div></div>
+      <div class="hero">
+        <div class="card">
+          <h1>卷积神经网络<br />CNN</h1>
+          <p class="lead" style="margin-top:12px">`CNN` 最适合处理图像这类有空间结构的数据。它不把图片看成一长串无序数字，而是利用局部邻域、边缘、纹理和形状这些空间模式。</p>
+          <p class="lead" style="margin-top:10px">抓住 4 个关键词：卷积核、特征图、池化、层级特征。浅层先看边缘，深层再组合成纹理、局部结构，最后才形成类别判断。</p>
+        </div>
+        <div class="flow">
+          <div class="flow-node"><strong>局部窗口扫描</strong><span>小卷积核在图像上滑动，提取局部模式。</span></div>
+          <div class="flow-node"><strong>生成特征图</strong><span>不同卷积核会对不同图案敏感，比如水平边缘或角点。</span></div>
+          <div class="flow-node"><strong>池化压缩</strong><span>保留重要响应，同时降低空间尺寸和计算量。</span></div>
+          <div class="flow-node"><strong>层层抽象</strong><span>从边缘到纹理再到物体部件，特征越来越高级。</span></div>
+        </div>
+      </div>
+      <div class="formula-row"><div class="formula"><strong>核心动作</strong><span>卷积</span></div><div class="formula"><strong>中间结果</strong><span>特征图</span></div><div class="formula"><strong>目标</strong><span>层级表示</span></div></div>
+      <div class="steps">
+        <div class="step"><div class="badge">1</div><h3>先理解局部感受野</h3><p>卷积核只看局部区域，这让模型更容易捕捉邻近像素之间的模式。</p></div>
+        <div class="step"><div class="badge">2</div><h3>再理解参数共享</h3><p>同一个卷积核在整张图上复用，减少参数并增强平移鲁棒性。</p></div>
+        <div class="step"><div class="badge">3</div><h3>最后理解层级特征</h3><p>CNN 的强大来自“从低级特征到高级语义”的逐层组织。</p></div>
+      </div>
+      <div class="bottom"><div class="note"><strong>一句话记忆</strong><span>CNN 就是用会滑动的小滤波器，在图像里逐层提取越来越高级的空间特征。</span></div><div class="legend"><span><i class="c1"></i>输入图像</span><span><i class="c2"></i>卷积核</span><span><i class="c3"></i>特征图</span><span><i class="c4"></i>池化输出</span></div></div>
+    </div></section>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Convolution</div><div class="sheet-index">Card 02 / 03</div></div>
+      <h2>卷积层到底在做什么</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>卷积核滑动</span><span>局部窗口在图像上扫描</span></div><canvas id="conv" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>特征图响应</span><span>边缘位置会被高亮</span></div><canvas id="feature" width="520" height="205"></canvas></div>
+      </div>
+      <div class="triple">
+        <div class="card"><h3>为什么适合图像</h3><p>因为图像中“附近像素一起看”才有意义，卷积天然利用了这种局部结构。</p></div>
+        <div class="card"><h3>为什么参数少</h3><p>同一个卷积核在不同位置重复使用，而不是为每个像素位置单独学一套权重。</p></div>
+        <div class="card"><h3>特征图是什么</h3><p>可以把它理解成“某种图案在各个位置上出现得有多强”的响应地图。</p></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>卷积层不是直接识别猫狗，而是在回答“这张图哪里像某种局部模式”。</span></div>
+    </div></section>
+    <section class="sheet"><div class="sheet-inner">
+      <div class="sheet-head"><div class="eyebrow">Hierarchy</div><div class="sheet-index">Card 03 / 03</div></div>
+      <h2>为什么 CNN 能学出视觉层级</h2>
+      <div class="two">
+        <div class="plot"><div class="plot-label"><span>池化压缩</span><span>保留重要响应，减少尺寸</span></div><canvas id="pool" width="520" height="205"></canvas></div>
+        <div class="plot"><div class="plot-label"><span>层级特征</span><span>边缘 -> 纹理 -> 部件 -> 类别</span></div><canvas id="hier" width="520" height="205"></canvas></div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini"><strong>优点</strong><span>善于处理图像、视频等有强空间结构的数据。</span></div>
+        <div class="mini"><strong>池化作用</strong><span>降低分辨率、保留强响应，并增强一定程度的位置鲁棒性。</span></div>
+        <div class="mini"><strong>限制</strong><span>对长距离依赖的全局关系建模不如注意力机制自然。</span></div>
+        <div class="mini"><strong>应用</strong><span>图像分类、目标检测、分割、医学影像、工业视觉。</span></div>
+      </div>
+      <div class="note"><strong>这张卡片的重点</strong><span>CNN 的真正价值不只是卷积本身，而是它让网络学会了“从局部模式逐步拼成全局语义”。</span></div>
+    </div></section>
+    <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
+  </div>
+  <script>
+    function setupCanvas(c){const r=window.devicePixelRatio||1,b=c.getBoundingClientRect();c.width=Math.floor(b.width*r);c.height=Math.floor(b.height*r);const x=c.getContext("2d");x.scale(r,r);return{ctx:x,w:b.width,h:b.height}}
+    function txt(ctx,t,x,y,c){ctx.save();ctx.fillStyle=c||"#5f6670";ctx.font="13px Segoe UI";ctx.fillText(t,x,y);ctx.restore()}
+    function conv(){const {ctx}=setupCanvas(document.getElementById("conv"));for(let i=0;i<7;i++)for(let j=0;j<7;j++){const x=34+i*24,y=26+j*24;ctx.strokeStyle="rgba(96,112,130,.22)";ctx.strokeRect(x,y,20,20);if((i>2&&i<5)||(j>2&&j<5)){ctx.fillStyle="rgba(79,99,199,.18)";ctx.fillRect(x,y,20,20)}}ctx.strokeStyle="#cf7b1b";ctx.lineWidth=2;ctx.strokeRect(82,74,68,68);txt(ctx,"卷积核正在局部窗口内取模式",18,18,"#cf7b1b")}
+    function feature(){const {ctx}=setupCanvas(document.getElementById("feature"));for(let i=0;i<6;i++)for(let j=0;j<6;j++){const x=54+i*30,y=28+j*24;const v=(i===2||i===3||j===2||j===3)? .85:.18;ctx.fillStyle=`rgba(34,139,95,${v})`;ctx.fillRect(x,y,24,18)}txt(ctx,"特征图把某类局部结构高亮出来",18,18,"#228b5f")}
+    function pool(){const {ctx}=setupCanvas(document.getElementById("pool"));for(let i=0;i<4;i++)for(let j=0;j<4;j++){const x=38+i*42,y=34+j*34;ctx.fillStyle=`rgba(79,99,199,${.14+((i+j)%3)*.2})`;ctx.fillRect(x,y,28,22)}ctx.strokeStyle="#b25454";ctx.lineWidth=2;ctx.strokeRect(44,40,82,62);ctx.beginPath();ctx.moveTo(160,74);ctx.lineTo(226,74);ctx.stroke();for(let i=0;i<2;i++)for(let j=0;j<2;j++){const x=244+i*56,y=48+j*48;ctx.fillStyle=`rgba(178,84,84,${.22+(i+j)*.24})`;ctx.fillRect(x,y,34,28)}txt(ctx,"池化后尺寸变小，但强响应被保留",18,18,"#b25454")}
+    function hier(){const {ctx}=setupCanvas(document.getElementById("hier"));const labels=[["边缘",60],["纹理",150],["部件",244],["类别",340]];labels.forEach((it,i)=>{ctx.fillStyle=["#4f63c7","#cf7b1b","#228b5f","#b25454"][i];ctx.beginPath();ctx.arc(it[1],104,24,0,Math.PI*2);ctx.fill();if(i<labels.length-1){ctx.strokeStyle="rgba(95,102,112,.4)";ctx.beginPath();ctx.moveTo(it[1]+24,104);ctx.lineTo(labels[i+1][1]-24,104);ctx.stroke()}txt(ctx,it[0],it[1]-16,150,["#4f63c7","#cf7b1b","#228b5f","#b25454"][i])});txt(ctx,"特征逐层从简单走向抽象",18,18,"#4f63c7")}
+    function render(){conv();feature();pool();hier()} window.addEventListener("load",render);window.addEventListener("resize",render);
+  </script>
+</body>
+</html>

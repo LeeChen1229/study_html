@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>互相关函数课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --cross: #5a4fcf;
+      --cross-soft: rgba(90, 79, 207, 0.10);
+      --x-color: #5a4fcf;
+      --y-color: #d17b18;
+      --good: #228b5f;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(90, 79, 207, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(209, 123, 24, 0.07), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1320px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .panel {
+      position: relative;
+      margin-bottom: 22px;
+      border-radius: 28px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.06fr 0.94fr;
+      gap: 20px;
+    }
+
+    .hero-main,
+    .hero-side,
+    .steps,
+    .main-viz,
+    .freq-panel {
+      padding: 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(90, 79, 207, 0.2);
+      background: rgba(90, 79, 207, 0.06);
+      color: var(--cross);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--x-color);
+      box-shadow: 18px 0 0 var(--y-color);
+      margin-right: 20px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      margin-top: 18px;
+      font-size: clamp(38px, 4.8vw, 64px);
+      line-height: 1.02;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .note p,
+    .step p,
+    .explain p,
+    .tip span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.85;
+      font-size: 15px;
+    }
+
+    .equation-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .equation,
+    .note,
+    .step,
+    .plot,
+    .tip {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.58);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+    }
+
+    .equation {
+      padding: 14px 16px;
+    }
+
+    .equation strong,
+    .tip strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .equation span {
+      font-family: var(--serif);
+      font-size: 24px;
+      color: #2d2f34;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .note {
+      padding: 18px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .step {
+      padding: 16px;
+    }
+
+    .step-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(90, 79, 207, 0.10);
+      color: var(--cross);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 210px;
+      display: block;
+    }
+
+    .explain {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .tip {
+      padding: 14px 16px;
+    }
+
+    .freq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .x-dot { background: var(--x-color); }
+    .y-dot { background: var(--y-color); }
+    .g-dot { background: var(--good); }
+
+    @media (max-width: 1120px) {
+      .hero,
+      .steps-grid,
+      .main-grid,
+      .explain,
+      .freq-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100vw - 18px, 1320px);
+        padding-top: 16px;
+      }
+
+      .hero-main,
+      .hero-side,
+      .steps,
+      .main-viz,
+      .freq-panel {
+        padding: 20px;
+      }
+
+      .equation-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="panel hero-main">
+        <div class="eyebrow">Cross-Correlation Visual Guide</div>
+        <h1>互相关函数<br />一眼看懂</h1>
+        <p class="lead">
+          互相关最重要的作用不是“算一个曲线”，而是找到两个信号在什么时移下最相似。
+          所以最容易理解它的方法，不是先记公式，而是先看两条波形如何从错位走向对齐，
+          再去看互相关曲线为什么会在某个非零延时处出现最大峰值。
+        </p>
+        <div class="equation-row">
+          <div class="equation">
+            <strong>定义</strong>
+            <span>R<sub>xy</sub>(τ)=E[x(t)y(t+τ)]</span>
+          </div>
+          <div class="equation">
+            <strong>最关键结论</strong>
+            <span>峰值位置 = 相对时移</span>
+          </div>
+          <div class="equation">
+            <strong>频域关系</strong>
+            <span>S<sub>xy</sub>(f)=X<sup>*</sup>(f)Y(f)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel hero-side">
+        <div class="note">
+          <h2>如何阅读</h2>
+          <p>先看左边两条波形一开始是错位的，再看把 `y(t)` 沿时间轴滑动后何时最好重合，最后对应到互相关曲线上的最高点。</p>
+        </div>
+        <div class="note">
+          <h2>一句话记忆</h2>
+          <p>互相关不只是看“像不像”，而是看“往哪边挪、挪多少，才最像”。因此峰值位置比峰值大小更有解释力。</p>
+        </div>
+        <div class="legend">
+          <span><i class="x-dot"></i>`x(t)` 参考信号</span>
+          <span><i class="y-dot"></i>`y(t)` 待对齐信号</span>
+          <span><i class="g-dot"></i>最佳对齐位置</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel steps">
+      <h2>三步理解互相关</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-index">1</div>
+          <h3>先观察错位</h3>
+          <p>若两条信号形状相似但时间上没对齐，当前重合部分较少，相关程度就不高。</p>
+        </div>
+        <div class="step">
+          <div class="step-index">2</div>
+          <h3>再做滑动</h3>
+          <p>把 `y(t)` 沿时间轴左右滑动，随着结构逐渐重合，相关值会不断增大。</p>
+        </div>
+        <div class="step">
+          <div class="step-index">3</div>
+          <h3>读出峰值</h3>
+          <p>当两者重合最好时，互相关达到最大值；这个峰值对应的 `τ*` 就是相对时移。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel main-viz">
+      <h2>核心可视化</h2>
+      <div class="main-grid">
+        <div class="plot">
+          <div class="plot-label"><span>步骤 A: 初始错位</span><span>两条信号尚未对齐</span></div>
+          <canvas id="misaligned" width="540" height="210"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>步骤 B: 最佳对齐</span><span>`y(t)` 滑动到最像的位置</span></div>
+          <canvas id="aligned" width="540" height="210"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>步骤 C: 互相关 `Rxy(τ)`</span><span>峰值出现在 `τ*` 处</span></div>
+          <canvas id="crossCorr" width="540" height="210"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>步骤 D: 峰值位置解释</span><span>`τ*` = 两信号的相对时移</span></div>
+          <canvas id="peakExplain" width="540" height="210"></canvas>
+        </div>
+      </div>
+      <div class="explain">
+        <div class="tip">
+          <strong>为什么这个版本更直观</strong>
+          <span>同一页同时给出“错位图、对齐图、互相关峰值图”，用户可以直接把波形移动和曲线峰值一一对应起来。</span>
+        </div>
+        <div class="tip">
+          <strong>工程意义</strong>
+          <span>在测距、同步、回波检测中，常常不是只关心相关有多大，而是关心“峰值出现在多大时延”。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel freq-panel">
+      <h2>频域下如何理解</h2>
+      <p class="lead">
+        频域里不要直接把互相关理解成“一条陌生曲线”，更直观的看法是：
+        先看 `x(t)` 和 `y(t)` 各自有哪些频率成分，再看它们哪些频率是共同拥有的，
+        最后再看这些共同成分之间的相位差是不是接近一条斜线。
+      </p>
+      <div class="freq-grid" style="margin-top:14px;">
+        <div class="plot">
+          <div class="plot-label"><span>步骤 1: 各自频谱</span><span>`X(f)` 与 `Y(f)` 是否重叠</span></div>
+          <canvas id="specCompare" width="540" height="210"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>步骤 2: 共同频率</span><span>重叠越强，`|Sxy(f)|` 越明显</span></div>
+          <canvas id="crossMag" width="540" height="210"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>步骤 3: 相位差</span><span>斜率对应时移</span></div>
+          <canvas id="crossPhase" width="540" height="210"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, baseY) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= width; x += width / 8) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= height; y += height / 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(0, baseY);
+      ctx.lineTo(width, baseY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCurve(ctx, width, height, generator, color, fillColor, baseY) {
+      const points = [];
+      for (let x = 0; x <= width; x += 1) {
+        const u = x / width;
+        points.push({ x, y: baseY - generator(u) * height * 0.28 });
+      }
+
+      ctx.save();
+      if (fillColor) {
+        ctx.fillStyle = fillColor;
+        ctx.beginPath();
+        points.forEach((p, i) => {
+          if (i === 0) {
+            ctx.moveTo(p.x, baseY);
+            ctx.lineTo(p.x, p.y);
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        });
+        for (let i = points.length - 1; i >= 0; i -= 1) {
+          ctx.lineTo(points[i].x, baseY);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const head = 8;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function signalTemplate(u) {
+      return (
+        0.95 * Math.exp(-Math.pow((u - 0.33) / 0.08, 2)) * Math.cos(2 * Math.PI * 12 * u) +
+        0.62 * Math.exp(-Math.pow((u - 0.62) / 0.1, 2)) * Math.cos(2 * Math.PI * 8 * u + 0.2)
+      );
+    }
+
+    function drawTwoSignals(canvasId, shift, aligned) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      const baseY = height / 2;
+      drawGrid(ctx, width, height, baseY);
+
+      drawCurve(ctx, width, height, (u) => signalTemplate(u), "#5a4fcf", null, baseY);
+      drawCurve(ctx, width, height, (u) => 0.95 * signalTemplate(u - shift), "#d17b18", null, baseY);
+
+      drawText(ctx, "x(t)", 16, 22, "#5a4fcf");
+      drawText(ctx, "y(t)", 56, 22, "#d17b18");
+
+      const left = aligned ? width * 0.42 : width * 0.34;
+      const right = aligned ? width * 0.56 : width * 0.68;
+      const y = 28;
+      drawArrow(ctx, left, y, right, y, aligned ? "#228b5f" : "#d17b18");
+      drawText(ctx, aligned ? "此时重合最好" : "仍存在时移", left + 6, y - 8, aligned ? "#228b5f" : "#d17b18");
+
+      if (aligned) {
+        ctx.save();
+        ctx.fillStyle = "rgba(34, 139, 95, 0.08)";
+        ctx.fillRect(width * 0.26, 32, width * 0.42, height - 58);
+        ctx.restore();
+      }
+    }
+
+    function drawCrossCorr() {
+      const canvas = document.getElementById("crossCorr");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const baseY = height / 2;
+      drawGrid(ctx, width, height, baseY);
+
+      const peakU = 0.64;
+      drawCurve(
+        ctx,
+        width,
+        height,
+        (u) => {
+          const tau = (u - peakU) * 4.2;
+          return Math.exp(-5.5 * tau * tau) * (0.9 + 0.08 * Math.cos(2 * Math.PI * 1.6 * tau));
+        },
+        "#5a4fcf",
+        "rgba(90, 79, 207, 0.10)",
+        baseY
+      );
+
+      const peakX = width * peakU;
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(peakX, 12);
+      ctx.lineTo(peakX, height - 12);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "0", width / 2 - 4, height - 10, "#5f6670");
+      drawText(ctx, "τ*", peakX - 6, height - 10, "#228b5f");
+      drawText(ctx, "最大峰值", peakX + 8, 28, "#228b5f");
+    }
+
+    function drawPeakExplain() {
+      const canvas = document.getElementById("peakExplain");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const baseY = height / 2;
+      drawGrid(ctx, width, height, baseY);
+
+      const center = width * 0.5;
+      const peak = width * 0.64;
+      ctx.save();
+      ctx.strokeStyle = "#5a4fcf";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(center, baseY + 18);
+      ctx.lineTo(peak, baseY + 18);
+      ctx.stroke();
+      ctx.restore();
+
+      drawArrow(ctx, center, baseY - 36, peak, baseY - 36, "#228b5f");
+      drawText(ctx, "从 0 挪到 τ*", center + 10, baseY - 46, "#228b5f");
+
+      ctx.save();
+      ctx.fillStyle = "rgba(90, 79, 207, 0.12)";
+      ctx.beginPath();
+      ctx.arc(center, baseY + 18, 5, 0, Math.PI * 2);
+      ctx.arc(peak, baseY + 18, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      drawText(ctx, "0", center - 4, baseY + 42, "#5f6670");
+      drawText(ctx, "τ*", peak - 6, baseY + 42, "#228b5f");
+      drawText(ctx, "结论: 峰值横坐标就是相对时移", 18, 28, "#5a4fcf");
+    }
+
+    function drawSpectrumBase(ctx, width, height) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= width; x += width / 8) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height - 18);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= height - 18; y += (height - 18) / 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(0, height - 18);
+      ctx.lineTo(width, height - 18);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSpectrumPair() {
+      const canvas = document.getElementById("specCompare");
+      const { ctx, width, height } = setupCanvas(canvas);
+      drawSpectrumBase(ctx, width, height);
+      const baseY = height - 18;
+
+      drawCurve(
+        ctx,
+        width,
+        height,
+        (u) => {
+          const g1 = 0.64 * Math.exp(-Math.pow((u - 0.32) / 0.10, 2));
+          const g2 = 0.88 * Math.exp(-Math.pow((u - 0.55) / 0.09, 2));
+          const g3 = 0.46 * Math.exp(-Math.pow((u - 0.74) / 0.07, 2));
+          return g1 + g2 + g3;
+        },
+        "#5a4fcf",
+        null,
+        baseY
+      );
+
+      drawCurve(
+        ctx,
+        width,
+        height,
+        (u) => {
+          const g1 = 0.55 * Math.exp(-Math.pow((u - 0.35) / 0.11, 2));
+          const g2 = 0.82 * Math.exp(-Math.pow((u - 0.58) / 0.10, 2));
+          const g3 = 0.36 * Math.exp(-Math.pow((u - 0.78) / 0.08, 2));
+          return g1 + g2 + g3;
+        },
+        "#d17b18",
+        null,
+        baseY
+      );
+
+      drawText(ctx, "紫色: X(f)", 16, 24, "#5a4fcf");
+      drawText(ctx, "橙色: Y(f)", 96, 24, "#d17b18");
+      drawText(ctx, "两者重叠区域最多的地方，就是共同频率成分", 16, 42, "#5f6670");
+    }
+
+    function drawCrossMag() {
+      const canvas = document.getElementById("crossMag");
+      const { ctx, width, height } = setupCanvas(canvas);
+      drawSpectrumBase(ctx, width, height);
+      const baseY = height - 18;
+      drawCurve(
+        ctx,
+        width,
+        height,
+        (u) => {
+          const g1 = 0.62 * Math.exp(-Math.pow((u - 0.32) / 0.1, 2));
+          const g2 = 0.92 * Math.exp(-Math.pow((u - 0.55) / 0.09, 2));
+          const g3 = 0.5 * Math.exp(-Math.pow((u - 0.74) / 0.07, 2));
+          return g1 + g2 + g3;
+        },
+        "#5a4fcf",
+        "rgba(90, 79, 207, 0.10)",
+        baseY
+      );
+      ctx.save();
+      ctx.fillStyle = "rgba(34, 139, 95, 0.08)";
+      ctx.fillRect(width * 0.24, 24, width * 0.46, height - 48);
+      ctx.restore();
+      drawText(ctx, "绿色区域可理解为: 两个信号共同拥有的频率部分", 16, 24, "#228b5f");
+      drawText(ctx, "共同成分越强，|Sxy(f)| 越高", 16, 42, "#5a4fcf");
+    }
+
+    function drawCrossPhase() {
+      const canvas = document.getElementById("crossPhase");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const baseY = height / 2;
+      drawGrid(ctx, width, height, baseY);
+      drawCurve(
+        ctx,
+        width,
+        height,
+        (u) => 0.88 - 1.74 * u,
+        "#5a4fcf",
+        null,
+        baseY
+      );
+      const x1 = width * 0.22;
+      const y1 = baseY - (0.88 - 1.74 * 0.22) * height * 0.28;
+      const x2 = width * 0.78;
+      const y2 = baseY - (0.88 - 1.74 * 0.78) * height * 0.28;
+      drawArrow(ctx, x1, y1 - 18, x2, y2 - 18, "#228b5f");
+      drawText(ctx, "斜率越稳定，越像纯时移", 16, 24, "#228b5f");
+      drawText(ctx, "不是在看高度，而是在看这条线有多倾斜", 16, 42, "#5a4fcf");
+    }
+
+    function renderAll() {
+      drawTwoSignals("misaligned", 0.11, false);
+      drawTwoSignals("aligned", 0.0, true);
+      drawCrossCorr();
+      drawPeakExplain();
+      drawSpectrumPair();
+      drawCrossMag();
+      drawCrossPhase();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

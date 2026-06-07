@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>自相关函数课程插图</title>
+  <style>
+    :root {
+      --paper: #f5f1e8;
+      --paper-deep: #ece5d8;
+      --ink: #1f2a37;
+      --muted: #607082;
+      --line: #cdbfa7;
+      --grid: rgba(87, 101, 122, 0.12);
+      --broad: #bc7a1a;
+      --broad-soft: rgba(188, 122, 26, 0.12);
+      --narrow: #2a6f97;
+      --narrow-soft: rgba(42, 111, 151, 0.12);
+      --periodic: #8b3a3a;
+      --periodic-soft: rgba(139, 58, 58, 0.12);
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(188, 122, 26, 0.08), transparent 20%),
+        radial-gradient(circle at top right, rgba(42, 111, 151, 0.08), transparent 18%),
+        linear-gradient(180deg, #f8f4ec 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.4));
+    }
+
+    .page {
+      width: min(1320px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .hero,
+    .summary,
+    .properties,
+    .cards {
+      margin-bottom: 22px;
+    }
+
+    .panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 252, 246, 0.94));
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      border-radius: 28px;
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+    }
+
+    .hero-main {
+      padding: 30px 30px 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(123, 103, 73, 0.16);
+      background: rgba(255, 255, 255, 0.6);
+      color: #6a563b;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--broad);
+      box-shadow: 18px 0 0 var(--narrow), 36px 0 0 var(--periodic);
+      margin-right: 38px;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-family: var(--serif);
+      font-size: clamp(36px, 4.8vw, 64px);
+      font-weight: 700;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 64ch;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .equation-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .equation {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.14);
+      background: rgba(255, 255, 255, 0.56);
+    }
+
+    .equation strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #705f47;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .equation span {
+      font-family: var(--serif);
+      font-size: 26px;
+      color: #2d2f34;
+    }
+
+    .hero-notes {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .note {
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(123, 103, 73, 0.14);
+    }
+
+    .note h2,
+    .summary h2,
+    .properties h2 {
+      margin: 0 0 10px;
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .note p,
+    .summary p,
+    .properties p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .summary {
+      padding: 24px 26px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .rule {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+    }
+
+    .rule strong {
+      color: #5d4a34;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    .rule span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .mini-axis {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+    }
+
+    .axis-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      color: #705f47;
+      font-size: 13px;
+    }
+
+    .lag-band {
+      position: relative;
+      height: 68px;
+      border-top: 1px dashed rgba(96, 112, 130, 0.5);
+      border-bottom: 1px dashed rgba(96, 112, 130, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .lag-band::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -1px;
+      bottom: -1px;
+      border-left: 1.6px solid rgba(31, 42, 55, 0.42);
+    }
+
+    .pulse {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 20px;
+      border-radius: 999px;
+    }
+
+    .pulse.broad {
+      left: 44%;
+      width: 12%;
+      background: linear-gradient(90deg, rgba(188, 122, 26, 0.35), rgba(188, 122, 26, 0.9));
+    }
+
+    .pulse.narrow {
+      left: 28%;
+      width: 44%;
+      background: linear-gradient(90deg, rgba(42, 111, 151, 0.2), rgba(42, 111, 151, 0.82));
+    }
+
+    .pulse.periodic {
+      left: 14%;
+      width: 72%;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(139, 58, 58, 0.05),
+        rgba(139, 58, 58, 0.05) 7%,
+        rgba(139, 58, 58, 0.72) 7%,
+        rgba(139, 58, 58, 0.72) 10%
+      );
+    }
+
+    .axis-note {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+      color: #7a7367;
+      font-size: 12px;
+    }
+
+    .properties {
+      padding: 24px 26px;
+    }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .property {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.54);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+    }
+
+    .property strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #5d4a34;
+      letter-spacing: 0.03em;
+    }
+
+    .property span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .chip {
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.52);
+    }
+
+    .card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.52);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      margin-bottom: 12px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 170px;
+      display: block;
+    }
+
+    .takeaway {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(123, 103, 73, 0.12);
+    }
+
+    .takeaway strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .takeaway span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .card.broad {
+      border-top: 5px solid var(--broad);
+    }
+
+    .card.broad .chip,
+    .card.broad h3 {
+      color: var(--broad);
+    }
+
+    .card.narrow {
+      border-top: 5px solid var(--narrow);
+    }
+
+    .card.narrow .chip,
+    .card.narrow h3 {
+      color: var(--narrow);
+    }
+
+    .card.periodic {
+      border-top: 5px solid var(--periodic);
+    }
+
+    .card.periodic .chip,
+    .card.periodic h3 {
+      color: var(--periodic);
+    }
+
+    @media (max-width: 1120px) {
+      .hero,
+      .summary-grid,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .property-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100vw - 18px, 1320px);
+        padding-top: 16px;
+      }
+
+      .hero-main,
+      .summary,
+      .properties,
+      .card {
+        padding: 20px;
+      }
+
+      .equation-row {
+        grid-template-columns: 1fr;
+      }
+
+      .rule {
+        grid-template-columns: 1fr;
+      }
+
+      .axis-note {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="panel hero-main">
+        <div class="eyebrow">Autocorrelation Course Illustration</div>
+        <h1>自相关函数的典型形态</h1>
+        <p class="lead">
+          自相关函数用于度量信号与其延时版本之间的相似程度。对信号分析而言，它不仅能描述
+          “相关持续多久”，还能揭示带宽、载频以及周期结构。下面这张课程插图将宽带信号、
+          窄带信号和周期性信号放在同一个观察框架下，直接比较它们的自相关形状差异。
+        </p>
+        <div class="equation-row">
+          <div class="equation">
+            <strong>定义</strong>
+            <span>R<sub>xx</sub>(τ) = E[x(t)x(t+τ)]</span>
+          </div>
+          <div class="equation">
+            <strong>通性</strong>
+            <span>R<sub>xx</sub>(τ) = R<sub>xx</sub>(-τ)</span>
+          </div>
+          <div class="equation">
+            <strong>峰值</strong>
+            <span>R<sub>xx</sub>(0) 最大</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel hero-notes">
+        <div class="note">
+          <h2>怎么看这张图</h2>
+          <p>先看时域波形，再看对应的自相关曲线。自相关越窄，说明信号相关时间越短，通常频带越宽；自相关越缓慢振荡，常对应更强的窄带或载频特征。</p>
+        </div>
+        <div class="note">
+          <h2>课程结论</h2>
+          <p>宽带看“尖峰”，窄带看“振荡包络”，周期信号看“重复峰列”。这三种图形是课程、考试和工程判断中最常见的自相关模式。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel summary">
+      <div class="summary-grid">
+        <div>
+          <h2>从自相关反推信号特性</h2>
+          <p>自相关函数可以理解成“延时后还像不像自己”。当信号中高频和多频成分丰富时，相似性会很快消失；当信号含有明显载频或稳定周期时，相似性会以振荡或重复峰值的形式保留下来。</p>
+          <div class="summary-list">
+            <div class="rule">
+              <strong>宽带信号</strong>
+              <span>自相关主峰很窄，离开零时延后迅速衰减，说明相关时间短、频谱展开宽。</span>
+            </div>
+            <div class="rule">
+              <strong>窄带信号</strong>
+              <span>自相关呈余弦样振荡，并带有缓慢衰减包络，说明围绕中心频率的相关性较强。</span>
+            </div>
+            <div class="rule">
+              <strong>周期性信号</strong>
+              <span>自相关会重复出现等间隔峰值，峰间距就是原信号周期或其整数倍。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-axis">
+          <div class="axis-title">
+            <span>延时轴 τ</span>
+            <span>负延时 ← 0 → 正延时</span>
+          </div>
+          <div class="lag-band">
+            <div class="pulse broad"></div>
+          </div>
+          <div class="lag-band">
+            <div class="pulse narrow"></div>
+          </div>
+          <div class="lag-band">
+            <div class="pulse periodic"></div>
+          </div>
+          <div class="axis-note">
+            <span>宽带: 主峰窄</span>
+            <span>窄带: 振荡持续</span>
+            <span>周期: 峰列重复</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel properties">
+      <h2>自相关的几个核心性质</h2>
+      <p>除去具体形状差异，三类信号都满足一些基础规律。这些规律能帮助你判断图画得对不对，也能作为推导和考试中的快速检查点。</p>
+      <div class="property-grid">
+        <div class="property">
+          <strong>偶对称</strong>
+          <span>自相关函数关于 τ = 0 对称，因此左半边和右半边形状应镜像一致。</span>
+        </div>
+        <div class="property">
+          <strong>零延时最大</strong>
+          <span>τ = 0 时与自身完全重合，所以相关值最大，通常是图中的最高点。</span>
+        </div>
+        <div class="property">
+          <strong>周期保持</strong>
+          <span>若原信号具有周期 T，则自相关也具有周期 T，这是识别周期信号最直接的图形证据。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cards">
+      <article class="panel card broad">
+        <div class="card-header">
+          <h3>宽带</h3>
+          <div class="chip">主峰尖窄</div>
+        </div>
+        <p>宽带信号含有更丰富的频率分量，时域细节变化快，因此稍微延时后就不再像原信号，自相关只在零时延附近显著；在频域中则表现为更宽的能量铺展。</p>
+        <div class="plot">
+          <div class="plot-label"><span>时域示意 x(t)</span><span>细节密集 / 快速变化</span></div>
+          <canvas id="broadSignal" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>自相关 Rxx(τ)</span><span>窄主峰 / 快速衰减</span></div>
+          <canvas id="broadAuto" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>频域示意 Sxx(f)</span><span>带宽较宽 / 连续展开</span></div>
+          <canvas id="broadFreq" width="420" height="170"></canvas>
+        </div>
+        <div class="takeaway">
+          <strong>教学提示</strong>
+          <span>相关时间短，对应频域更宽。这是“时宽频窄 / 时窄频宽”关系在自相关视角下的直观体现。</span>
+        </div>
+      </article>
+
+      <article class="panel card narrow">
+        <div class="card-header">
+          <h3>窄带</h3>
+          <div class="chip">振荡包络</div>
+        </div>
+        <p>窄带信号通常围绕某个中心频率振荡。延时后仍保留明显的相位关系，因此自相关常呈现余弦样振荡，并伴随较慢衰减的包络；在频域中能量集中在较窄频带内。</p>
+        <div class="plot">
+          <div class="plot-label"><span>时域示意 x(t)</span><span>载频明显 / 振荡稳定</span></div>
+          <canvas id="narrowSignal" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>自相关 Rxx(τ)</span><span>振荡对称 / 衰减较慢</span></div>
+          <canvas id="narrowAuto" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>频域示意 Sxx(f)</span><span>中心频率明显 / 频带较窄</span></div>
+          <canvas id="narrowFreq" width="420" height="170"></canvas>
+        </div>
+        <div class="takeaway">
+          <strong>教学提示</strong>
+          <span>自相关中的振荡频率通常对应中心载频信息，包络宽度则反映带宽大小。</span>
+        </div>
+      </article>
+
+      <article class="panel card periodic">
+        <div class="card-header">
+          <h3>周期性</h3>
+          <div class="chip">重复峰列</div>
+        </div>
+        <p>对于周期信号，只要延时等于一个周期或其整数倍，信号仍会与自身重新对齐，因此自相关会周期性重复出现峰值；在频域中则常对应离散谱线或谐波结构。</p>
+        <div class="plot">
+          <div class="plot-label"><span>时域示意 x(t)</span><span>重复结构 / 周期 T</span></div>
+          <canvas id="periodicSignal" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>自相关 Rxx(τ)</span><span>峰值间隔 = T</span></div>
+          <canvas id="periodicAuto" width="420" height="170"></canvas>
+        </div>
+        <div class="plot">
+          <div class="plot-label"><span>频域示意 Sxx(f)</span><span>离散谱线 / 谐波成分</span></div>
+          <canvas id="periodicFreq" width="420" height="170"></canvas>
+        </div>
+        <div class="takeaway">
+          <strong>教学提示</strong>
+          <span>如果图上出现等间隔峰列，可以优先判断原信号具有明显周期结构。</span>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawBase(ctx, width, height) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.16)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= width; x += width / 8) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= height; y += height / 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.3)";
+      ctx.beginPath();
+      ctx.moveTo(width / 2, 0);
+      ctx.lineTo(width / 2, height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLine(ctx, points, color, fillColor) {
+      ctx.save();
+      if (fillColor) {
+        ctx.fillStyle = fillColor;
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.baseY);
+            ctx.lineTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        for (let i = points.length - 1; i >= 0; i -= 1) {
+          ctx.lineTo(points[i].x, points[i].baseY);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function plot(canvasId, color, fillColor, generator) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      drawBase(ctx, width, height);
+      const baseY = height / 2;
+      const points = [];
+      for (let x = 0; x <= width; x += 1) {
+        const u = x / width;
+        const value = generator(u);
+        points.push({
+          x,
+          y: baseY - value * height * 0.34,
+          baseY
+        });
+      }
+      drawLine(ctx, points, color, fillColor);
+    }
+
+    function drawSpectrumBase(ctx, width, height) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.16)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= width; x += width / 8) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height - 18);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= height - 18; y += (height - 18) / 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.3)";
+      ctx.beginPath();
+      ctx.moveTo(0, height - 18);
+      ctx.lineTo(width, height - 18);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function plotSpectrum(canvasId, color, fillColor, generator) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      drawSpectrumBase(ctx, width, height);
+      const baseY = height - 18;
+      const points = [];
+      for (let x = 0; x <= width; x += 1) {
+        const u = x / width;
+        const value = Math.max(0, generator(u));
+        points.push({
+          x,
+          y: baseY - value * (height - 32),
+          baseY
+        });
+      }
+      drawLine(ctx, points, color, fillColor);
+    }
+
+    function drawSpectrumLines(canvasId, color, lines) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      drawSpectrumBase(ctx, width, height);
+      const baseY = height - 18;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      lines.forEach(({ pos, amp }) => {
+        const x = pos * width;
+        const y = baseY - amp * (height - 34);
+        ctx.beginPath();
+        ctx.moveTo(x, baseY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawBroadSignal() {
+      plot("broadSignal", "#bc7a1a", "rgba(188, 122, 26, 0.10)", (u) => {
+        const burst = 0.75 + 0.25 * Math.exp(-Math.pow((u - 0.5) / 0.2, 2));
+        return (
+          0.34 * Math.sin(2 * Math.PI * 7 * u) +
+          0.28 * Math.sin(2 * Math.PI * 17 * u + 0.5) +
+          0.18 * Math.sin(2 * Math.PI * 31 * u + 1.1) +
+          0.12 * Math.sin(2 * Math.PI * 53 * u)
+        ) * burst;
+      });
+    }
+
+    function drawBroadAuto() {
+      plot("broadAuto", "#bc7a1a", "rgba(188, 122, 26, 0.10)", (u) => {
+        const tau = (u - 0.5) * 2.8;
+        return Math.exp(-18 * tau * tau);
+      });
+    }
+
+    function drawNarrowSignal() {
+      plot("narrowSignal", "#2a6f97", "rgba(42, 111, 151, 0.10)", (u) => {
+        const envelope = 0.86 + 0.1 * Math.cos(2 * Math.PI * 1.2 * u);
+        return envelope * Math.cos(2 * Math.PI * 11 * u);
+      });
+    }
+
+    function drawNarrowAuto() {
+      plot("narrowAuto", "#2a6f97", "rgba(42, 111, 151, 0.10)", (u) => {
+        const tau = (u - 0.5) * 2.4;
+        return Math.exp(-1.8 * tau * tau) * Math.cos(2 * Math.PI * 3.7 * tau);
+      });
+    }
+
+    function pulseTrain(u, period, width) {
+      const phase = (u % period) / period;
+      return phase < width ? 1 : 0;
+    }
+
+    function drawPeriodicSignal() {
+      plot("periodicSignal", "#8b3a3a", "rgba(139, 58, 58, 0.10)", (u) => {
+        const pulses = pulseTrain(u + 0.02, 0.16, 0.28);
+        const shaping = 0.16 * Math.sin(2 * Math.PI * 18 * u);
+        return 0.84 * pulses - 0.4 + shaping;
+      });
+    }
+
+    function drawPeriodicAuto() {
+      plot("periodicAuto", "#8b3a3a", "rgba(139, 58, 58, 0.10)", (u) => {
+        const tau = (u - 0.5) * 6;
+        let sum = 0;
+        for (let k = -4; k <= 4; k += 1) {
+          const shift = tau - k * 1.05;
+          sum += Math.exp(-8 * shift * shift);
+        }
+        return 0.92 * sum;
+      });
+    }
+
+    function drawBroadFreq() {
+      plotSpectrum("broadFreq", "#bc7a1a", "rgba(188, 122, 26, 0.10)", (u) => {
+        const a = 0.55 * Math.exp(-Math.pow((u - 0.28) / 0.18, 2));
+        const b = 0.78 * Math.exp(-Math.pow((u - 0.52) / 0.22, 2));
+        const c = 0.48 * Math.exp(-Math.pow((u - 0.78) / 0.18, 2));
+        return a + b + c;
+      });
+    }
+
+    function drawNarrowFreq() {
+      plotSpectrum("narrowFreq", "#2a6f97", "rgba(42, 111, 151, 0.10)", (u) => {
+        const main = 0.95 * Math.exp(-Math.pow((u - 0.62) / 0.06, 2));
+        const side1 = 0.22 * Math.exp(-Math.pow((u - 0.54) / 0.03, 2));
+        const side2 = 0.22 * Math.exp(-Math.pow((u - 0.70) / 0.03, 2));
+        return main + side1 + side2;
+      });
+    }
+
+    function drawPeriodicFreq() {
+      drawSpectrumLines("periodicFreq", "#8b3a3a", [
+        { pos: 0.12, amp: 0.22 },
+        { pos: 0.24, amp: 0.35 },
+        { pos: 0.36, amp: 0.56 },
+        { pos: 0.48, amp: 0.86 },
+        { pos: 0.60, amp: 0.62 },
+        { pos: 0.72, amp: 0.42 },
+        { pos: 0.84, amp: 0.26 }
+      ]);
+    }
+
+    function renderAll() {
+      drawBroadSignal();
+      drawBroadAuto();
+      drawBroadFreq();
+      drawNarrowSignal();
+      drawNarrowAuto();
+      drawNarrowFreq();
+      drawPeriodicSignal();
+      drawPeriodicAuto();
+      drawPeriodicFreq();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>损失函数与梯度下降课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #5b53c9;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(91, 83, 201, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(91, 83, 201, 0.2);
+      background: rgba(91, 83, 201, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(91, 83, 201, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(91, 83, 201, 0.6), rgba(91, 83, 201, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #5248b9;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Loss And Gradient Descent Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>损失函数与<br />梯度下降</h1>
+            <p class="lead" style="margin-top: 12px;">
+              损失函数回答的是“模型错得有多厉害”，梯度下降回答的是“怎样让它变得更好”。把这两件事看懂，你就理解了大多数机器学习训练的共同骨架。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个关键词：损失、梯度、更新方向、学习率。它们分别对应“评判标准”“局部变化趋势”“怎么改参数”“每次改多大”。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先定义损失</strong>
+              <span>损失函数衡量当前预测和真实答案之间的差距。</span>
+            </div>
+            <div class="flow-node">
+              <strong>再计算梯度</strong>
+              <span>梯度反映损失随参数变化时最陡的上升方向。</span>
+            </div>
+            <div class="flow-node">
+              <strong>沿反方向更新</strong>
+              <span>为了让损失减小，参数要朝梯度的反方向移动。</span>
+            </div>
+            <div class="flow-node">
+              <strong>重复直到收敛</strong>
+              <span>经过多轮更新后，模型逐渐靠近更优解。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>损失</strong>
+            <span>L(y, ŷ)</span>
+          </div>
+          <div class="formula">
+            <strong>梯度</strong>
+            <span>∇L</span>
+          </div>
+          <div class="formula">
+            <strong>更新</strong>
+            <span>θ ← θ - η∇L</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先衡量错得多不多</h3>
+            <p>损失越大，说明预测偏差越严重；损失越小，说明模型当前表现越好。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再看往哪边走</h3>
+            <p>梯度告诉我们哪里上升最快，所以要朝着相反方向移动，才能让损失下降。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后决定走多大步</h3>
+            <p>学习率决定每次参数更新的步长，太大可能震荡，太小又会收敛得很慢。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>损失函数负责“打分”，梯度下降负责“改参数”，学习率负责“控制每一步走多大”。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>损失曲线 / 曲面</span>
+            <span><i class="c2"></i>参数更新点</span>
+            <span><i class="c3"></i>更优方向</span>
+            <span><i class="c4"></i>震荡 / 误差风险</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Loss And Descent</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>梯度下降在做什么</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>损失曲线</span><span>越往低处走越好</span></div>
+            <canvas id="lossBowl" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>下降路径</span><span>一步步逼近更小损失</span></div>
+            <canvas id="descentPath" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>损失曲线怎么理解</h3>
+            <p>你可以把损失函数想成一张地形图。山顶表示损失大，谷底表示损失小。训练就是不断往更低的地方走。</p>
+          </div>
+          <div class="card">
+            <h3>梯度为什么有效</h3>
+            <p>梯度给出的是“当前最陡上升方向”，所以往反方向走，通常就会更快地靠近低损失区域。</p>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>局部信息</strong>
+            <span>梯度只告诉你当前位置附近的变化趋势，它不是直接告诉你终点在哪，而是指导你下一步怎么走。</span>
+          </div>
+          <div class="mini-card">
+            <strong>为什么要多轮迭代</strong>
+            <span>一次更新通常不够，需要反复修正参数，才能逐步从高损失走向更低损失。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>先把梯度下降理解成“在地形图上往低处走”，就能避开很多抽象符号带来的理解障碍。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Learning Rate</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>学习率为什么重要</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>学习率过小</span><span>下降很稳，但收敛很慢</span></div>
+            <canvas id="smallLR" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>学习率过大</span><span>容易来回震荡，甚至错过最优点</span></div>
+            <canvas id="largeLR" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>学习率太小</strong>
+            <span>每次更新都走得很谨慎，虽然通常比较稳定，但可能要花很多轮训练才能接近较优解。</span>
+          </div>
+          <div class="mini-card">
+            <strong>学习率太大</strong>
+            <span>每次步子迈得太猛，可能在最优点附近来回跳动，甚至直接跳过低损失区域。</span>
+          </div>
+          <div class="mini-card">
+            <strong>一个好学习率</strong>
+            <span>理想情况是既能明显下降，又不会发生剧烈震荡。这也是训练中最常调的超参数之一。</span>
+          </div>
+          <div class="mini-card">
+            <strong>和前几页的关系</strong>
+            <span>无论是线性回归还是逻辑回归，只要涉及参数更新，背后几乎都能看到这套“损失 + 梯度 + 学习率”的逻辑。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>学习率不是数学细节，而是训练是否顺利的关键开关。理解它，你就真正看懂了“为什么模型会好起来”。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawAxes(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    function bowlValue(u) {
+      const x = (u - 0.55) * 2.2;
+      return 0.16 + 0.72 * x * x;
+    }
+
+    function drawLossBowl() {
+      const canvas = document.getElementById("lossBowl");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawAxes(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#5b53c9";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      for (let i = 0; i <= 160; i += 1) {
+        const u = i / 160;
+        const v = bowlValue(u);
+        const p = mapPoint(u, 1 - v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const low = mapPoint(0.55, 1 - bowlValue(0.55), width, height, margin);
+      drawText(ctx, "谷底 = 更小损失", low.x - 42, low.y - 12, "#228b5f");
+      drawText(ctx, "参数 θ", width - 44, height - 8);
+      drawText(ctx, "损失", 8, 16);
+    }
+
+    function drawDescentPath() {
+      const canvas = document.getElementById("descentPath");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawAxes(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#5b53c9";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 160; i += 1) {
+        const u = i / 160;
+        const v = bowlValue(u);
+        const p = mapPoint(u, 1 - v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const steps = [0.10, 0.24, 0.38, 0.48, 0.54];
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let i = 0; i < steps.length - 1; i += 1) {
+        const p1 = mapPoint(steps[i], 1 - bowlValue(steps[i]), width, height, margin);
+        const p2 = mapPoint(steps[i + 1], 1 - bowlValue(steps[i + 1]), width, height, margin);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      steps.forEach((u, i) => {
+        const p = mapPoint(u, 1 - bowlValue(u), width, height, margin);
+        ctx.save();
+        ctx.fillStyle = i === steps.length - 1 ? "#228b5f" : "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawText(ctx, "参数沿着更优方向一步步下降", 18, 20, "#5b53c9");
+    }
+
+    function drawSmallLR() {
+      const canvas = document.getElementById("smallLR");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawAxes(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#5b53c9";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 160; i += 1) {
+        const u = i / 160;
+        const v = bowlValue(u);
+        const p = mapPoint(u, 1 - v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const steps = [0.12, 0.20, 0.28, 0.36, 0.42, 0.47, 0.51];
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let i = 0; i < steps.length - 1; i += 1) {
+        const p1 = mapPoint(steps[i], 1 - bowlValue(steps[i]), width, height, margin);
+        const p2 = mapPoint(steps[i + 1], 1 - bowlValue(steps[i + 1]), width, height, margin);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      steps.forEach((u) => {
+        const p = mapPoint(u, 1 - bowlValue(u), width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawText(ctx, "步子小，收敛稳但慢", 18, 20, "#228b5f");
+    }
+
+    function drawLargeLR() {
+      const canvas = document.getElementById("largeLR");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawAxes(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#5b53c9";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 160; i += 1) {
+        const u = i / 160;
+        const v = bowlValue(u);
+        const p = mapPoint(u, 1 - v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const steps = [0.12, 0.78, 0.20, 0.72, 0.30, 0.66];
+      ctx.save();
+      ctx.strokeStyle = "#b25454";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let i = 0; i < steps.length - 1; i += 1) {
+        const p1 = mapPoint(steps[i], 1 - bowlValue(steps[i]), width, height, margin);
+        const p2 = mapPoint(steps[i + 1], 1 - bowlValue(steps[i + 1]), width, height, margin);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      steps.forEach((u) => {
+        const p = mapPoint(u, 1 - bowlValue(u), width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawText(ctx, "步子太大，容易来回震荡", 18, 20, "#b25454");
+    }
+
+    function renderAll() {
+      drawLossBowl();
+      drawDescentPath();
+      drawSmallLR();
+      drawLargeLR();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

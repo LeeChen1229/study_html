@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>训练集、验证集、测试集课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #5d56c8;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(93, 86, 200, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(93, 86, 200, 0.2);
+      background: rgba(93, 86, 200, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(93, 86, 200, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(93, 86, 200, 0.6), rgba(93, 86, 200, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #544dc0;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Train, Validation And Test Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>训练集、验证集<br />与测试集</h1>
+            <p class="lead" style="margin-top: 12px;">
+              数据不是都拿来训练就最好。机器学习真正关心的是模型在新数据上的表现，所以必须留出一部分数据，专门用来调模型和做最终检验。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个词：训练、调参、选择、最终评估。它们分别对应训练集、验证集、模型比较和测试集。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>训练集</strong>
+              <span>用来学习参数，让模型真正“长本事”。</span>
+            </div>
+            <div class="flow-node">
+              <strong>验证集</strong>
+              <span>用来比较不同模型、不同超参数，帮助你做选择。</span>
+            </div>
+            <div class="flow-node">
+              <strong>测试集</strong>
+              <span>在模型定下来之后，再做一次最终评估。</span>
+            </div>
+            <div class="flow-node">
+              <strong>三者不能混用</strong>
+              <span>一旦角色混淆，评估结果就不再可信。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>训练集</strong>
+            <span>学参数</span>
+          </div>
+          <div class="formula">
+            <strong>验证集</strong>
+            <span>调模型</span>
+          </div>
+          <div class="formula">
+            <strong>测试集</strong>
+            <span>做终检</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先训练模型</h3>
+            <p>模型在训练集上更新参数，学习输入和输出之间的映射关系。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再选更好的版本</h3>
+            <p>验证集帮助你比较不同超参数和结构，防止只看训练表现就盲目决定模型。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后再做终检</h3>
+            <p>测试集只在最后使用一次，用来估计模型对真实未知数据的最终表现。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>训练集用来学，验证集用来选，测试集用来做最后报告，三者分工明确才能保证评估可信。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>训练流程</span>
+            <span><i class="c2"></i>数据切分</span>
+            <span><i class="c3"></i>最终评估</span>
+            <span><i class="c4"></i>数据泄漏风险</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Data Split</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>数据为什么要切分</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>数据切分图</span><span>一份数据承担不同职责</span></div>
+            <canvas id="splitBar" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>错误做法</span><span>全拿来训练会让评估失真</span></div>
+            <canvas id="leakage" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>为什么不能都拿来训练</h3>
+            <p>如果所有数据都被模型提前见过，那么你再用这些数据评估模型时，它很可能只是“记住了题目”，而不是学会了真正可泛化的规律。</p>
+          </div>
+          <div class="card">
+            <h3>什么是数据泄漏</h3>
+            <p>当测试集信息提前参与训练或调参时，模型就等于偷看了答案，最终的分数会虚高，失去参考意义。</p>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>常见比例</strong>
+            <span>常见做法如 `70/15/15` 或 `80/10/10`，重点不是背比例，而是保证三类数据职责清晰、彼此独立。</span>
+          </div>
+          <div class="mini-card">
+            <strong>核心直觉</strong>
+            <span>训练集像平时练习，验证集像模拟考试，测试集像正式考试。正式考试不能提前拿来反复练。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>切分数据不是浪费样本，而是在为“真实泛化能力”保留一个可信的检验机制。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Workflow And Roles</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>三类数据在流程里怎么配合</h2>
+
+        <div class="triple-grid">
+          <div class="plot">
+            <div class="plot-label"><span>训练阶段</span><span>用训练集更新参数</span></div>
+            <canvas id="trainFlow" width="320" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>选择阶段</span><span>用验证集比较模型</span></div>
+            <canvas id="valFlow" width="320" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>终检阶段</span><span>用测试集做最后评估</span></div>
+            <canvas id="testFlow" width="320" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>训练集的角色</strong>
+            <span>它直接参与梯度下降和参数更新，是模型学习知识的来源。</span>
+          </div>
+          <div class="mini-card">
+            <strong>验证集的角色</strong>
+            <span>它不参与参数学习，但会参与“选谁更好”的决策，所以不能拿来当最终成绩。</span>
+          </div>
+          <div class="mini-card">
+            <strong>测试集的角色</strong>
+            <span>它最好只在最后使用一次，用来给出一个尽可能客观的最终泛化评估。</span>
+          </div>
+          <div class="mini-card">
+            <strong>常见误区</strong>
+            <span>如果你不断根据测试集结果改模型，那么测试集实际上也被拿来调参了，它就不再是“真正未知”的了。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>训练集、验证集、测试集不是三个名字而已，而是机器学习实验设计里最基本的可信度保证。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawSplitBar() {
+      const canvas = document.getElementById("splitBar");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const x = 30;
+      const y = height / 2 - 22;
+      const w = width - 60;
+      const h = 44;
+      const trainW = w * 0.7;
+      const valW = w * 0.15;
+      const testW = w * 0.15;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(93, 86, 200, 0.15)";
+      ctx.fillRect(x, y, trainW, h);
+      ctx.fillStyle = "rgba(207, 123, 27, 0.15)";
+      ctx.fillRect(x + trainW, y, valW, h);
+      ctx.fillStyle = "rgba(34, 139, 95, 0.15)";
+      ctx.fillRect(x + trainW + valW, y, testW, h);
+      ctx.strokeStyle = "rgba(31,42,55,0.25)";
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+
+      drawText(ctx, "训练集", x + trainW / 2 - 18, y + 27, "#5d56c8");
+      drawText(ctx, "验证集", x + trainW + valW / 2 - 18, y + 27, "#cf7b1b");
+      drawText(ctx, "测试集", x + trainW + valW + testW / 2 - 18, y + 27, "#228b5f");
+      drawText(ctx, "一份数据，不同职责", 20, 28, "#5d56c8");
+    }
+
+    function drawLeakage() {
+      const canvas = document.getElementById("leakage");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const boxW = 110;
+      const boxH = 46;
+      const y = 54;
+      const x1 = 24;
+      const x2 = width / 2 - boxW / 2;
+      const x3 = width - boxW - 24;
+
+      const drawBox = (x, label, fill, stroke) => {
+        ctx.save();
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(x, y, boxW, boxH);
+        ctx.strokeRect(x, y, boxW, boxH);
+        ctx.restore();
+        drawText(ctx, label, x + 24, y + 28, stroke);
+      };
+
+      drawBox(x1, "训练", "rgba(93, 86, 200, 0.10)", "#5d56c8");
+      drawBox(x2, "测试", "rgba(34, 139, 95, 0.10)", "#228b5f");
+      drawBox(x3, "结果", "rgba(207, 123, 27, 0.10)", "#cf7b1b");
+
+      ctx.save();
+      ctx.strokeStyle = "#b25454";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x2 + boxW / 2, y + boxH);
+      ctx.lineTo(x2 + boxW / 2, height - 42);
+      ctx.lineTo(x1 + boxW / 2, height - 42);
+      ctx.lineTo(x1 + boxW / 2, y + boxH);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "错误：测试集结果反过来参与训练", 20, 28, "#b25454");
+      drawText(ctx, "这会导致数据泄漏", width / 2 - 52, height - 18, "#b25454");
+    }
+
+    function drawStage(canvasId, title, boxColor, strokeColor, withLoop) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const boxes = [
+        { x: 22, y: 54, w: 74, h: 38, label: "数据" },
+        { x: 122, y: 54, w: 74, h: 38, label: "模型" },
+        { x: 222, y: 54, w: 74, h: 38, label: "结果" }
+      ];
+
+      boxes.forEach((b) => {
+        ctx.save();
+        ctx.fillStyle = boxColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        ctx.strokeRect(b.x, b.y, b.w, b.h);
+        ctx.restore();
+        drawText(ctx, b.label, b.x + 22, b.y + 24, strokeColor);
+      });
+
+      ctx.save();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(96, 73);
+      ctx.lineTo(122, 73);
+      ctx.moveTo(196, 73);
+      ctx.lineTo(222, 73);
+      ctx.stroke();
+      ctx.restore();
+
+      if (withLoop) {
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(259, 92);
+        ctx.lineTo(259, 134);
+        ctx.lineTo(159, 134);
+        ctx.lineTo(159, 92);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      drawText(ctx, title, 18, 28, strokeColor);
+    }
+
+    function drawTrainFlow() {
+      drawStage("trainFlow", "训练集参与参数更新", "rgba(93, 86, 200, 0.10)", "#5d56c8", true);
+    }
+
+    function drawValFlow() {
+      drawStage("valFlow", "验证集参与模型选择", "rgba(207, 123, 27, 0.10)", "#cf7b1b", false);
+    }
+
+    function drawTestFlow() {
+      drawStage("testFlow", "测试集只做最终报告", "rgba(34, 139, 95, 0.10)", "#228b5f", false);
+    }
+
+    function renderAll() {
+      drawSplitBar();
+      drawLeakage();
+      drawTrainFlow();
+      drawValFlow();
+      drawTestFlow();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

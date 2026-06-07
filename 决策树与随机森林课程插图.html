@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>决策树与随机森林课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #4f63c7;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(79, 99, 199, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(79, 99, 199, 0.2);
+      background: rgba(79, 99, 199, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(79, 99, 199, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(79, 99, 199, 0.6), rgba(79, 99, 199, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #4960b9;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Decision Tree And Random Forest Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>决策树与<br />随机森林</h1>
+            <p class="lead" style="margin-top: 12px;">
+              决策树的核心思想是“不断提问，把样本一步步分开”。它不像线性模型那样直接画一条线，而是通过一连串条件判断，把特征空间切成多个区域。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              随机森林则是“很多棵树一起投票”。单棵树容易不稳定，多棵树集成后通常更稳、更抗噪声，也更不容易过拟合。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先选一个特征</strong>
+              <span>例如“温度是否大于某个阈值”，把数据分成两部分。</span>
+            </div>
+            <div class="flow-node">
+              <strong>再继续细分</strong>
+              <span>对每个子区域继续问问题，直到叶节点足够纯。</span>
+            </div>
+            <div class="flow-node">
+              <strong>单棵树能解释</strong>
+              <span>树结构直观，容易看出模型的决策路径。</span>
+            </div>
+            <div class="flow-node">
+              <strong>森林更稳定</strong>
+              <span>多棵树基于不同样本和特征训练，再通过投票得出更稳的结果。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>树模型</strong>
+            <span>不断二分</span>
+          </div>
+          <div class="formula">
+            <strong>叶节点</strong>
+            <span>给出类别/数值</span>
+          </div>
+          <div class="formula">
+            <strong>随机森林</strong>
+            <span>多树投票</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先理解树的提问方式</h3>
+            <p>决策树每一步都在问“按哪个条件切分，能让两边更纯”。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再理解叶节点输出</h3>
+            <p>走到不同叶节点，模型就会输出不同预测，分类时可理解为投向某一类。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后理解森林的作用</h3>
+            <p>多棵树减少单棵树的偶然性，让整体预测更稳、更鲁棒。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>决策树是“逐步提问”，随机森林是“很多棵树一起表决”，后者通常更稳定。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>切分边界</span>
+            <span><i class="c2"></i>样本点</span>
+            <span><i class="c3"></i>森林投票</span>
+            <span><i class="c4"></i>单树波动</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Tree Split</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>决策树怎么分裂</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>树结构</span><span>通过条件判断一路分裂</span></div>
+            <canvas id="treeStructure" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>特征空间切分</span><span>一连串规则把平面切成块</span></div>
+            <canvas id="treeRegion" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="triple-grid">
+          <div class="card">
+            <h3>树的本质</h3>
+            <p>每个内部节点都是一个问题，例如“`x1 > 0.5` 吗”。模型通过不断问问题来缩小候选区域。</p>
+          </div>
+          <div class="card">
+            <h3>切分结果</h3>
+            <p>每一次切分都会把数据空间切成更小块，最终每块区域由一个叶节点负责给出预测。</p>
+          </div>
+          <div class="card">
+            <h3>和线性模型的区别</h3>
+            <p>线性模型更像画一条整体边界，树模型更像用一系列局部规则拼出决策边界。</p>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>决策树的强项在于规则直观、表达非线性边界方便，但单棵树也容易因为样本扰动而变化较大。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Forest Ensemble</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>随机森林为什么更稳</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>多棵树投票</span><span>不同树给出各自判断</span></div>
+            <canvas id="forestVote" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>单树 vs 森林</span><span>集成后边界更稳定</span></div>
+            <canvas id="forestCompare" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>为什么要随机</strong>
+            <span>随机森林会对样本和特征做随机抽样，让不同树学到略有差异的视角，避免所有树都犯同样的错误。</span>
+          </div>
+          <div class="mini-card">
+            <strong>为什么更稳</strong>
+            <span>单棵树像一个意见很强的个体，随机森林像一群人投票，偶然噪声对最终结果的影响会被平均掉。</span>
+          </div>
+          <div class="mini-card">
+            <strong>优点</strong>
+            <span>通常不需要太强的数据预处理，对非线性关系友好，也能处理特征之间复杂的交互。</span>
+          </div>
+          <div class="mini-card">
+            <strong>代价</strong>
+            <span>相比单棵树，可解释性会下降一些；虽然整体更稳，但你很难像读单棵树那样直接读完整规则。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>随机森林的关键不是“树更多了”，而是“通过随机性制造差异，再用集成把波动平均掉”。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    function drawTreeStructure() {
+      const canvas = document.getElementById("treeStructure");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const nodes = {
+        a: [width / 2, 34, "x1 > 0.5?"],
+        b: [width / 2 - 110, 96, "x2 > 0.4?"],
+        c: [width / 2 + 110, 96, "类别 B"],
+        d: [width / 2 - 170, 158, "类别 A"],
+        e: [width / 2 - 50, 158, "类别 B"]
+      };
+
+      const line = (from, to) => {
+        ctx.save();
+        ctx.strokeStyle = "#5a58c9";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(nodes[from][0], nodes[from][1] + 14);
+        ctx.lineTo(nodes[to][0], nodes[to][1] - 14);
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      line("a", "b");
+      line("a", "c");
+      line("b", "d");
+      line("b", "e");
+
+      Object.values(nodes).forEach(([x, y, text], i) => {
+        ctx.save();
+        ctx.fillStyle = i >= 2 ? "rgba(34, 139, 95, 0.12)" : "rgba(90, 88, 201, 0.10)";
+        ctx.strokeStyle = i >= 2 ? "#228b5f" : "#5a58c9";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(x - 42, y - 14, 84, 28, 10);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        drawText(ctx, text, x - 26, y + 4, i >= 2 ? "#228b5f" : "#5a58c9");
+      });
+
+      drawText(ctx, "不断提问 -> 不断分裂", 18, 22, "#5a58c9");
+    }
+
+    function drawTreeRegion() {
+      const canvas = document.getElementById("treeRegion");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const splitX = mapPoint(0.52, 0.1, width, height, margin).x;
+      const splitY = mapPoint(0.1, 0.46, width, height, margin).y;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(90, 88, 201, 0.08)";
+      ctx.fillRect(margin.left, margin.top, splitX - margin.left, height - margin.bottom - margin.top);
+      ctx.fillStyle = "rgba(34, 139, 95, 0.08)";
+      ctx.fillRect(splitX, margin.top, width - margin.right - splitX, height - margin.bottom - margin.top);
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "#5a58c9";
+      ctx.lineWidth = 2.1;
+      ctx.beginPath();
+      ctx.moveTo(splitX, margin.top);
+      ctx.lineTo(splitX, height - margin.bottom);
+      ctx.moveTo(margin.left, splitY);
+      ctx.lineTo(splitX, splitY);
+      ctx.stroke();
+      ctx.restore();
+
+      const blue = [[0.18,0.76],[0.24,0.62],[0.32,0.72],[0.20,0.34]];
+      const orange = [[0.70,0.26],[0.80,0.34],[0.86,0.22],[0.74,0.42]];
+      const green = [[0.36,0.24],[0.42,0.32],[0.48,0.20]];
+
+      const drawPts = (pts, color) => {
+        pts.forEach(([u, v]) => {
+          const p = mapPoint(u, v, width, height, margin);
+          ctx.save();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      };
+
+      drawPts(blue, "#5a58c9");
+      drawPts(orange, "#cf7b1b");
+      drawPts(green, "#228b5f");
+      drawText(ctx, "树模型用规则切区域", 18, 20, "#5a58c9");
+    }
+
+    function drawForestVote() {
+      const canvas = document.getElementById("forestVote");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const trees = [
+        { x: 82, vote: "A", color: "#5a58c9" },
+        { x: 206, vote: "A", color: "#5a58c9" },
+        { x: 330, vote: "B", color: "#cf7b1b" }
+      ];
+
+      trees.forEach((tree, i) => {
+        ctx.save();
+        ctx.strokeStyle = tree.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(tree.x, 54);
+        ctx.lineTo(tree.x, 108);
+        ctx.moveTo(tree.x, 72);
+        ctx.lineTo(tree.x - 22, 92);
+        ctx.moveTo(tree.x, 72);
+        ctx.lineTo(tree.x + 22, 92);
+        ctx.stroke();
+        ctx.restore();
+
+        drawText(ctx, `树${i + 1}`, tree.x - 14, 36, tree.color);
+        drawText(ctx, `投票 ${tree.vote}`, tree.x - 20, 126, tree.color);
+      });
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(82, 150);
+      ctx.lineTo(206, 184);
+      ctx.lineTo(330, 150);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "多数投票 -> 最终输出 A", width / 2 - 72, 200, "#228b5f");
+    }
+
+    function drawForestCompare() {
+      const canvas = document.getElementById("forestCompare");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const ptsA = [[0.18,0.74],[0.24,0.66],[0.30,0.78],[0.34,0.62],[0.42,0.68]];
+      const ptsB = [[0.64,0.28],[0.70,0.36],[0.76,0.24],[0.84,0.38],[0.90,0.30]];
+
+      const drawPts = (pts, color) => {
+        pts.forEach(([u, v]) => {
+          const p = mapPoint(u, v, width, height, margin);
+          ctx.save();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      };
+
+      drawPts(ptsA, "#5a58c9");
+      drawPts(ptsB, "#cf7b1b");
+
+      ctx.save();
+      ctx.strokeStyle = "#b25454";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const u = i / 100;
+        const v = 0.52 + 0.16 * Math.sin(4.5 * Math.PI * u);
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const u = i / 100;
+        const v = 0.50;
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "单树边界更容易波动", 18, 20, "#b25454");
+      drawText(ctx, "森林边界更稳", 18, 38, "#228b5f");
+    }
+
+    function renderAll() {
+      drawTreeStructure();
+      drawTreeRegion();
+      drawForestVote();
+      drawForestCompare();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

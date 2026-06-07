@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>支持向量机课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #4d66c9;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(77, 102, 201, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(77, 102, 201, 0.2);
+      background: rgba(77, 102, 201, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(77, 102, 201, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(77, 102, 201, 0.6), rgba(77, 102, 201, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #4961bb;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Support Vector Machine Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>支持向量机</h1>
+            <p class="lead" style="margin-top: 12px;">
+              支持向量机的核心不是“只分开两类”，而是“找到一条把两类分开且间隔尽可能大的边界”。它关心的不只是分对，还关心分得是否足够稳。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个词：分类边界、最大间隔、支持向量、核技巧。前两个解释线性可分，后两个解释为什么它能处理更复杂的非线性情况。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先找可分边界</strong>
+              <span>在两类样本之间找一条线或超平面，把它们区分开。</span>
+            </div>
+            <div class="flow-node">
+              <strong>再让间隔尽量大</strong>
+              <span>边界两侧离样本越远，模型通常越稳，对扰动更不敏感。</span>
+            </div>
+            <div class="flow-node">
+              <strong>支持向量最关键</strong>
+              <span>真正决定边界位置的是离边界最近的那些点。</span>
+            </div>
+            <div class="flow-node">
+              <strong>核技巧扩展到非线性</strong>
+              <span>把原空间中难分的数据映射到更容易线性分开的空间。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>核心目标</strong>
+            <span>最大化间隔</span>
+          </div>
+          <div class="formula">
+            <strong>关键样本</strong>
+            <span>支持向量</span>
+          </div>
+          <div class="formula">
+            <strong>非线性扩展</strong>
+            <span>核函数</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先理解最大间隔</h3>
+            <p>不是任意找到一条分界线就行，而是优先找“离两类都尽量远”的那条线。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再理解支持向量</h3>
+            <p>边界位置主要由离边界最近的样本决定，远处的大部分样本影响反而较小。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后理解核技巧</h3>
+            <p>原空间里分不开的数据，换到更高维空间后，可能就能被线性边界切开。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>支持向量机不是只在找边界，而是在找“最稳的边界”；真正决定它的是离边界最近的那批点。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>分类边界</span>
+            <span><i class="c2"></i>样本点</span>
+            <span><i class="c3"></i>最大间隔</span>
+            <span><i class="c4"></i>支持向量</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Maximum Margin</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>支持向量机在做什么</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>最大间隔边界</span><span>不是随便一条分界线</span></div>
+            <canvas id="marginPlot" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>支持向量</span><span>靠最近样本来定边界</span></div>
+            <canvas id="supportVectorPlot" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="triple-grid">
+          <div class="card">
+            <h3>为什么最大间隔更稳</h3>
+            <p>如果边界离两边样本都更远，那么轻微噪声和扰动更不容易让样本跨过边界，模型会更稳健。</p>
+          </div>
+          <div class="card">
+            <h3>支持向量是谁</h3>
+            <p>就是那些贴着间隔边缘的样本点。它们像“卡位点”，决定了边界最终能放在哪里。</p>
+          </div>
+          <div class="card">
+            <h3>和逻辑回归的区别</h3>
+            <p>逻辑回归更强调概率输出，SVM 更强调最大间隔分类边界，两者都能做分类，但直觉重点不同。</p>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>支持向量机最有辨识度的地方，就是“间隔”这个概念。它不是只会分类，而是在尽量让分类边界更稳。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Kernel Trick</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>核技巧怎么理解</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>原空间</span><span>圆环结构无法线性分开</span></div>
+            <canvas id="originalSpace" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>映射后空间</span><span>换个空间就可能线性可分</span></div>
+            <canvas id="mappedSpace" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>为什么需要核技巧</strong>
+            <span>现实数据常常不是一条直线就能分开。核技巧让 SVM 不必手工真的升维，也能在更高维空间实现线性分离。</span>
+          </div>
+          <div class="mini-card">
+            <strong>直觉上怎么想</strong>
+            <span>原来在平面里缠在一起的点，换一个观察角度后，可能就变成上下分层或左右可分。</span>
+          </div>
+          <div class="mini-card">
+            <strong>优点</strong>
+            <span>在中小规模数据上，SVM 往往是很强的分类器，尤其适合边界明显、特征维度较高的情况。</span>
+          </div>
+          <div class="mini-card">
+            <strong>限制</strong>
+            <span>当数据量特别大时，训练成本会更高；同时它不像树模型那样容易直接读出一套清晰规则。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>核技巧不是神秘公式，可以先把它理解成“换一个更容易分开的空间去看数据”，这就是 SVM 能处理非线性边界的关键。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    const classA = [[0.18,0.76],[0.24,0.66],[0.30,0.80],[0.36,0.60],[0.42,0.70]];
+    const classB = [[0.62,0.26],[0.70,0.34],[0.76,0.22],[0.84,0.38],[0.90,0.28]];
+
+    function drawPoints(ctx, width, height, margin) {
+      classA.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#4d66c9";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      classB.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawMarginPlot() {
+      const canvas = document.getElementById("marginPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawPoints(ctx, width, height, margin);
+
+      const midX = mapPoint(0.53, 0.1, width, height, margin).x;
+      const leftX = mapPoint(0.42, 0.1, width, height, margin).x;
+      const rightX = mapPoint(0.64, 0.1, width, height, margin).x;
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(midX, margin.top);
+      ctx.lineTo(midX, height - margin.bottom);
+      ctx.stroke();
+      ctx.strokeStyle = "#4d66c9";
+      ctx.setLineDash([7, 6]);
+      ctx.beginPath();
+      ctx.moveTo(leftX, margin.top);
+      ctx.lineTo(leftX, height - margin.bottom);
+      ctx.moveTo(rightX, margin.top);
+      ctx.lineTo(rightX, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "中间这条线 = 分类边界", 18, 20, "#228b5f");
+      drawText(ctx, "两条虚线 = 间隔边界", 18, 38, "#4d66c9");
+    }
+
+    function drawSupportVectorPlot() {
+      const canvas = document.getElementById("supportVectorPlot");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawPoints(ctx, width, height, margin);
+
+      const supportA = [0.42, 0.70];
+      const supportB = [0.62, 0.26];
+      [supportA, supportB].forEach(([u, v], i) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.strokeStyle = i === 0 ? "#b25454" : "#b25454";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 8.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      const x = mapPoint(0.53, 0.1, width, height, margin).x;
+      ctx.moveTo(x, margin.top);
+      ctx.lineTo(x, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "红圈点 = 支持向量", 18, 20, "#b25454");
+      drawText(ctx, "它们决定边界位置", 18, 38, "#5f6670");
+    }
+
+    function drawOriginalSpace() {
+      const canvas = document.getElementById("originalSpace");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const center = mapPoint(0.5, 0.5, width, height, margin);
+      const inner = 34;
+      const outer = 76;
+
+      for (let i = 0; i < 8; i += 1) {
+        const a = (Math.PI * 2 * i) / 8;
+        const x = center.x + outer * Math.cos(a);
+        const y = center.y + outer * Math.sin(a);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(x, y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      for (let i = 0; i < 5; i += 1) {
+        const a = (Math.PI * 2 * i) / 5 + 0.3;
+        const x = center.x + inner * Math.cos(a);
+        const y = center.y + inner * Math.sin(a);
+        ctx.save();
+        ctx.fillStyle = "#4d66c9";
+        ctx.beginPath();
+        ctx.arc(x, y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      drawText(ctx, "原空间里像同心圆，难用直线分开", 18, 20, "#b25454");
+    }
+
+    function drawMappedSpace() {
+      const canvas = document.getElementById("mappedSpace");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const upper = [[0.18,0.76],[0.30,0.78],[0.42,0.74],[0.58,0.77],[0.76,0.75]];
+      const lower = [[0.16,0.28],[0.34,0.24],[0.52,0.26],[0.70,0.30],[0.84,0.25]];
+
+      upper.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#4d66c9";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      lower.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      const y = mapPoint(0.1, 0.52, width, height, margin).y;
+      ctx.moveTo(margin.left, y);
+      ctx.lineTo(width - margin.right, y);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "映射后就可能被线性边界切开", 18, 20, "#228b5f");
+    }
+
+    function renderAll() {
+      drawMarginPlot();
+      drawSupportVectorPlot();
+      drawOriginalSpace();
+      drawMappedSpace();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

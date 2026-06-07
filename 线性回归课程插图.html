@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>线性回归课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #3564c8;
+      --accent-2: #ca7a1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(53, 100, 200, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(202, 122, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(53, 100, 200, 0.2);
+      background: rgba(53, 100, 200, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 18px 0 0 var(--accent-2), 36px 0 0 var(--accent-3);
+      margin-right: 38px;
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.12fr 0.88fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(53, 100, 200, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(53, 100, 200, 0.6), rgba(53, 100, 200, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #3556aa;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Linear Regression Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>线性回归</h1>
+            <p class="lead" style="margin-top: 12px;">
+              线性回归可以先理解成“用一条直线去概括样本之间的趋势”。它不是要求每个点都刚好落在线上，而是希望整体误差尽量小。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个词就够了：拟合、残差、均方误差、梯度下降。后面的优化过程，本质上都围绕这四件事展开。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先假设一条线</strong>
+              <span>模型用 `ŷ = wx + b` 近似描述输入和输出之间的线性关系。</span>
+            </div>
+            <div class="flow-node">
+              <strong>再计算误差</strong>
+              <span>每个样本点和直线之间都有差距，这个差距就是残差。</span>
+            </div>
+            <div class="flow-node">
+              <strong>构造整体损失</strong>
+              <span>把所有样本误差汇总成 MSE，用来衡量当前直线好不好。</span>
+            </div>
+            <div class="flow-node">
+              <strong>持续优化参数</strong>
+              <span>不断更新 `w` 和 `b`，让损失一轮轮下降。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>模型</strong>
+            <span>ŷ = wx + b</span>
+          </div>
+          <div class="formula">
+            <strong>残差</strong>
+            <span>e = y - ŷ</span>
+          </div>
+          <div class="formula">
+            <strong>目标</strong>
+            <span>最小化 MSE</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先画一条线</h3>
+            <p>假设输入和输出之间近似存在线性关系，用直线去描述总体趋势。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再衡量误差</h3>
+            <p>每个样本点和直线之间都有距离，距离越小，说明当前拟合越合理。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后持续调参数</h3>
+            <p>训练时不断调整 `w` 和 `b`，让总损失下降，直到找到更合适的直线。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>线性回归就是找到一条最能代表整体趋势的直线，让所有样本点到这条线的平方误差尽量小。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>拟合直线</span>
+            <span><i class="c2"></i>样本点</span>
+            <span><i class="c3"></i>更优方向</span>
+            <span><i class="c4"></i>残差 / 误差</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Fit And Residuals</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>线性回归在看什么</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>拟合直线</span><span>用一条线概括整体趋势</span></div>
+            <canvas id="fitLine" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>残差</span><span>点到直线的垂直距离就是误差</span></div>
+            <canvas id="residuals" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>拟合直线</h3>
+            <p>图中的蓝线不是为了穿过每一个点，而是尽量概括所有样本的整体趋势。线性回归关注的是总体上“最合适”的直线。</p>
+          </div>
+          <div class="card">
+            <h3>残差</h3>
+            <p>红线表示样本点和预测值之间的差距，也就是残差。残差越小，说明当前模型对该样本的预测越准确。</p>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>参数 `w, b`</strong>
+            <span>`w` 控制斜率，决定输入变化时输出变化得有多快；`b` 控制截距，决定整条直线的位置。</span>
+          </div>
+          <div class="mini-card">
+            <strong>残差的意义</strong>
+            <span>线性回归不是只看某一个点，而是把所有样本的残差整体考虑进去，再决定当前拟合是否合理。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>先建立“直线在干什么、误差在哪里”的直觉。后面看损失函数时，你就知道它到底在汇总什么。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Loss And Optimization</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>线性回归怎么变好</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>均方误差 MSE</span><span>误差大时会被平方放大</span></div>
+            <canvas id="mseCompare" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>梯度下降</span><span>沿着损失变小的方向更新参数</span></div>
+            <canvas id="gradient" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>为什么用 MSE</strong>
+            <span>MSE 会先把误差平方再平均，因此大误差会被放大，这使模型更重视偏差特别大的样本。</span>
+          </div>
+          <div class="mini-card">
+            <strong>什么是梯度下降</strong>
+            <span>梯度告诉我们损失增长最快的方向，训练时往相反方向更新参数，就能让损失一步步下降。</span>
+          </div>
+          <div class="mini-card">
+            <strong>训练过程</strong>
+            <span>线性回归训练不是一次完成，而是参数多次更新的过程。每更新一次，模型就希望比上一轮更接近正确答案。</span>
+          </div>
+          <div class="mini-card">
+            <strong>学习重点</strong>
+            <span>入门阶段先理解“为什么定义这个损失、为什么更新后会更好”，暂时不用急着推导完整公式。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>线性回归不是单纯画一条线，而是通过损失函数和优化过程，逐步找到那条更合适的线。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    const points = [
+      [0.10, 0.18], [0.18, 0.24], [0.27, 0.31], [0.34, 0.37], [0.46, 0.48],
+      [0.58, 0.57], [0.69, 0.69], [0.81, 0.76], [0.90, 0.82]
+    ];
+
+    function drawLine(ctx, width, height, margin, color, fn) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const u = i / 100;
+        const v = fn(u);
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawDots(ctx, width, height, margin) {
+      points.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#ca7a1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawFitLine() {
+      const canvas = document.getElementById("fitLine");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawLine(ctx, width, height, margin, "#3564c8", (u) => 0.10 + 0.80 * u);
+      drawDots(ctx, width, height, margin);
+      drawText(ctx, "样本点", 18, 20, "#ca7a1b");
+      drawText(ctx, "拟合直线", 76, 20, "#3564c8");
+      drawText(ctx, "x", width - 18, height - 8);
+      drawText(ctx, "y", 8, 16);
+    }
+
+    function drawResiduals() {
+      const canvas = document.getElementById("residuals");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      const fn = (u) => 0.10 + 0.80 * u;
+      drawLine(ctx, width, height, margin, "#3564c8", fn);
+      drawDots(ctx, width, height, margin);
+
+      [1, 3, 6].forEach((idx) => {
+        const [u, v] = points[idx];
+        const p1 = mapPoint(u, v, width, height, margin);
+        const p2 = mapPoint(u, fn(u), width, height, margin);
+        ctx.save();
+        ctx.strokeStyle = "#b25454";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      drawText(ctx, "红线 = 残差", 18, 20, "#b25454");
+      drawText(ctx, "每个点到直线的垂直差距", 96, 20, "#5f6670");
+    }
+
+    function drawMSECompare() {
+      const canvas = document.getElementById("mseCompare");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const baseY = height - 32;
+      const leftX = width * 0.24;
+      const rightX = width * 0.66;
+      const barW = 54;
+      const goodH = 66;
+      const badH = 132;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(28, baseY);
+      ctx.lineTo(width - 18, baseY);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "rgba(34, 139, 95, 0.16)";
+      ctx.fillRect(leftX, baseY - goodH, barW, goodH);
+      ctx.fillStyle = "rgba(178, 84, 84, 0.18)";
+      ctx.fillRect(rightX, baseY - badH, barW, badH);
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(leftX, baseY - goodH, barW, goodH);
+      ctx.strokeStyle = "#b25454";
+      ctx.strokeRect(rightX, baseY - badH, barW, badH);
+      ctx.restore();
+
+      drawText(ctx, "较小 MSE", leftX - 6, baseY + 20, "#228b5f");
+      drawText(ctx, "较大 MSE", rightX - 6, baseY + 20, "#b25454");
+      drawText(ctx, "平方会放大大误差，因此偏差大的拟合会被惩罚得更重", 18, 20, "#3564c8");
+      drawText(ctx, "好拟合", leftX + 8, baseY - goodH - 10, "#228b5f");
+      drawText(ctx, "差拟合", rightX + 8, baseY - badH - 10, "#b25454");
+    }
+
+    function drawGradient() {
+      const canvas = document.getElementById("gradient");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 16, right: 16, bottom: 24, left: 28 };
+      drawGrid(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#3564c8";
+      ctx.lineWidth = 2.3;
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i += 1) {
+        const u = i / 120;
+        const v = 0.82 * Math.exp(-3 * u) + 0.08;
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const steps = [0.10, 0.24, 0.42, 0.68];
+      steps.forEach((u, i) => {
+        const v = 0.82 * Math.exp(-3 * u) + 0.08;
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = i === steps.length - 1 ? "#228b5f" : "#ca7a1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let i = 0; i < steps.length - 1; i += 1) {
+        const u1 = steps[i];
+        const v1 = 0.82 * Math.exp(-3 * u1) + 0.08;
+        const u2 = steps[i + 1];
+        const v2 = 0.82 * Math.exp(-3 * u2) + 0.08;
+        const p1 = mapPoint(u1, v1, width, height, margin);
+        const p2 = mapPoint(u2, v2, width, height, margin);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "每次更新参数，损失再下降一点", 18, 20, "#3564c8");
+      drawText(ctx, "更优方向", 168, 38, "#228b5f");
+      drawText(ctx, "迭代次数", width - 56, height - 8);
+      drawText(ctx, "损失", 8, 16);
+    }
+
+    function renderAll() {
+      drawFitLine();
+      drawResiduals();
+      drawMSECompare();
+      drawGradient();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

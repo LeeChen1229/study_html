@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>常见评估指标课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #5a58c9;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(90, 88, 201, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(90, 88, 201, 0.2);
+      background: rgba(90, 88, 201, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(90, 88, 201, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(90, 88, 201, 0.6), rgba(90, 88, 201, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #544fc0;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Common Metrics Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>常见评估指标</h1>
+            <p class="lead" style="margin-top: 12px;">
+              训练完模型之后，不能只问“它准不准”，还要问“它到底在哪种意义上表现好”。不同任务、不同业务重点，会对应不同的评估指标。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 6 个词：MAE、MSE、RMSE、准确率、精确率、召回率。再加上 `F1` 和混淆矩阵，就能形成最基本的指标框架。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>回归任务</strong>
+              <span>重点看预测值和真实值差了多少，如 `MAE`、`MSE`、`RMSE`。</span>
+            </div>
+            <div class="flow-node">
+              <strong>分类任务</strong>
+              <span>重点看分类对错结构，如准确率、精确率、召回率和 `F1`。</span>
+            </div>
+            <div class="flow-node">
+              <strong>混淆矩阵</strong>
+              <span>它把“分对了什么、分错了什么”拆开看，是分类指标的基础表。</span>
+            </div>
+            <div class="flow-node">
+              <strong>没有单一万能指标</strong>
+              <span>同一个模型在不同指标下可能表现不同，所以指标要结合任务目标来看。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>回归误差</strong>
+            <span>|y - ŷ|</span>
+          </div>
+          <div class="formula">
+            <strong>分类正确率</strong>
+            <span>正确 / 总数</span>
+          </div>
+          <div class="formula">
+            <strong>F1</strong>
+            <span>综合 P 与 R</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先看任务类型</h3>
+            <p>回归任务和分类任务不能共用同一套指标，先判断任务类型是第一步。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再看业务重点</h3>
+            <p>有些场景更怕漏检，有些场景更怕误报，所以不能只盯着一个总体数字。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后选合适指标</h3>
+            <p>指标不是越多越好，而是要和你的任务目标、代价结构、数据特点一致。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>指标不是模型的装饰品，而是你判断模型是否真的“有用”的标尺。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>回归误差</span>
+            <span><i class="c2"></i>样本 / 预测</span>
+            <span><i class="c3"></i>分类正确</span>
+            <span><i class="c4"></i>误报 / 漏报</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Regression Metrics</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>回归指标怎么看</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>误差示意</span><span>每个点都可能有预测偏差</span></div>
+            <canvas id="regressionError" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>MAE / MSE / RMSE</span><span>对大误差的敏感程度不同</span></div>
+            <canvas id="regressionBars" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="triple-grid">
+          <div class="card">
+            <h3>MAE</h3>
+            <p>平均绝对误差，直觉最直接。它把每个误差按绝对值平均，对异常大误差没有额外放大。</p>
+          </div>
+          <div class="card">
+            <h3>MSE</h3>
+            <p>均方误差，会把大误差平方放大，所以对异常点更敏感，训练优化里也很常见。</p>
+          </div>
+          <div class="card">
+            <h3>RMSE</h3>
+            <p>均方根误差，是 MSE 开方后的结果，仍保留对大误差敏感的特性，但量纲更接近原变量。</p>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>如果你特别在意“大错不能犯”，通常会更关注 `MSE/RMSE`；如果你想要更直观、稳健的平均误差感受，可以先看 `MAE`。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Classification Metrics</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>分类指标怎么看</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>混淆矩阵</span><span>把分对和分错拆开看</span></div>
+            <canvas id="confusion" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>精确率 / 召回率 / F1</span><span>误报与漏报的权衡</span></div>
+            <canvas id="prf" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>准确率</strong>
+            <span>整体上分对了多少，但在类别不平衡时可能会误导你，比如全判为大类也可能看起来很高。</span>
+          </div>
+          <div class="mini-card">
+            <strong>精确率</strong>
+            <span>“判成正类的里面，有多少是真的正类”。适合关心误报成本的场景。</span>
+          </div>
+          <div class="mini-card">
+            <strong>召回率</strong>
+            <span>“真实正类里面，有多少被找出来了”。适合关心漏检成本的场景。</span>
+          </div>
+          <div class="mini-card">
+            <strong>F1</strong>
+            <span>它综合精确率和召回率，适合在两者都重要时做一个平衡参考。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>分类任务里不要只看准确率。先看混淆矩阵，再看精确率和召回率，最后用 `F1` 把两者综合起来，通常更稳妥。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    function drawRegressionError() {
+      const canvas = document.getElementById("regressionError");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const fn = (u) => 0.18 + 0.68 * u;
+      ctx.save();
+      ctx.strokeStyle = "#5a58c9";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const u = i / 100;
+        const p = mapPoint(u, fn(u), width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const points = [
+        [0.10, 0.19], [0.18, 0.27], [0.28, 0.30], [0.40, 0.52], [0.55, 0.47],
+        [0.68, 0.70], [0.78, 0.80], [0.88, 0.76]
+      ];
+
+      points.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        const q = mapPoint(u, fn(u), width, height, margin);
+        ctx.save();
+        ctx.strokeStyle = "#b25454";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.stroke();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawText(ctx, "红线 = 每个样本的预测误差", 18, 20, "#b25454");
+    }
+
+    function drawRegressionBars() {
+      const canvas = document.getElementById("regressionBars");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const baseY = height - 34;
+      const xs = [80, 210, 340];
+      const vals = [74, 118, 98];
+      const labels = ["MAE", "MSE", "RMSE"];
+      const colors = ["#5a58c9", "#b25454", "#228b5f"];
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(31,42,55,0.28)";
+      ctx.beginPath();
+      ctx.moveTo(26, baseY);
+      ctx.lineTo(width - 18, baseY);
+      ctx.stroke();
+      ctx.restore();
+
+      xs.forEach((x, i) => {
+        ctx.save();
+        ctx.fillStyle = colors[i] === "#b25454" ? "rgba(178, 84, 84, 0.18)" : colors[i] === "#228b5f" ? "rgba(34, 139, 95, 0.18)" : "rgba(90, 88, 201, 0.18)";
+        ctx.strokeStyle = colors[i];
+        ctx.lineWidth = 2;
+        ctx.fillRect(x, baseY - vals[i], 58, vals[i]);
+        ctx.strokeRect(x, baseY - vals[i], 58, vals[i]);
+        ctx.restore();
+        drawText(ctx, labels[i], x + 12, baseY + 20, colors[i]);
+      });
+
+      drawText(ctx, "大误差会让 MSE 抬得更高", 18, 24, "#b25454");
+      drawText(ctx, "因此它对异常偏差最敏感", 18, 42, "#5f6670");
+    }
+
+    function drawConfusion() {
+      const canvas = document.getElementById("confusion");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const startX = 96;
+      const startY = 34;
+      const cell = 64;
+      const labels = [
+        { x: startX + 18, y: 24, text: "预测负" },
+        { x: startX + cell + 18, y: 24, text: "预测正" },
+        { x: 26, y: startY + 36, text: "实际负" },
+        { x: 26, y: startY + cell + 36, text: "实际正" }
+      ];
+
+      const fillCell = (x, y, fill, stroke, text) => {
+        ctx.save();
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(x, y, cell, cell);
+        ctx.strokeRect(x, y, cell, cell);
+        ctx.restore();
+        drawText(ctx, text, x + 20, y + 36, stroke);
+      };
+
+      fillCell(startX, startY, "rgba(34, 139, 95, 0.15)", "#228b5f", "TN");
+      fillCell(startX + cell, startY, "rgba(178, 84, 84, 0.12)", "#b25454", "FP");
+      fillCell(startX, startY + cell, "rgba(178, 84, 84, 0.12)", "#b25454", "FN");
+      fillCell(startX + cell, startY + cell, "rgba(34, 139, 95, 0.15)", "#228b5f", "TP");
+
+      labels.forEach((item) => drawText(ctx, item.text, item.x, item.y));
+      drawText(ctx, "精确率看 TP 和 FP", 284, 76, "#5a58c9");
+      drawText(ctx, "召回率看 TP 和 FN", 284, 118, "#cf7b1b");
+      drawText(ctx, "准确率看整体对错", 284, 160, "#228b5f");
+    }
+
+    function drawPRF() {
+      const canvas = document.getElementById("prf");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const items = [
+        { label: "准确率", value: 0.84, color: "#228b5f", y: 38 },
+        { label: "精确率", value: 0.78, color: "#5a58c9", y: 78 },
+        { label: "召回率", value: 0.62, color: "#cf7b1b", y: 118 },
+        { label: "F1", value: 0.69, color: "#b25454", y: 158 }
+      ];
+
+      items.forEach((item) => {
+        ctx.save();
+        ctx.fillStyle = "rgba(95, 103, 118, 0.10)";
+        ctx.fillRect(92, item.y - 12, width - 128, 18);
+        ctx.fillStyle = item.color === "#228b5f"
+          ? "rgba(34, 139, 95, 0.18)"
+          : item.color === "#cf7b1b"
+          ? "rgba(207, 123, 27, 0.18)"
+          : item.color === "#b25454"
+          ? "rgba(178, 84, 84, 0.18)"
+          : "rgba(90, 88, 201, 0.18)";
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 1.8;
+        ctx.fillRect(92, item.y - 12, (width - 128) * item.value, 18);
+        ctx.strokeRect(92, item.y - 12, (width - 128) * item.value, 18);
+        ctx.restore();
+        drawText(ctx, item.label, 26, item.y + 1, item.color);
+        drawText(ctx, item.value.toFixed(2), width - 40, item.y + 1, item.color);
+      });
+
+      drawText(ctx, "F1 在精确率与召回率之间做平衡", 18, 22, "#b25454");
+    }
+
+    function renderAll() {
+      drawRegressionError();
+      drawRegressionBars();
+      drawConfusion();
+      drawPRF();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

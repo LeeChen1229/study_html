@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>过拟合、欠拟合与正则化课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #6a4fd1;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(106, 79, 209, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(106, 79, 209, 0.2);
+      background: rgba(106, 79, 209, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(106, 79, 209, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(106, 79, 209, 0.6), rgba(106, 79, 209, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #5a43bf;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Overfitting, Underfitting And Regularization Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>过拟合、欠拟合<br />与正则化</h1>
+            <p class="lead" style="margin-top: 12px;">
+              模型不是越复杂越好，也不是越简单越稳。真正重要的是它能不能抓住规律，又不把训练集里的噪声当成规律，这就是泛化能力。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时抓住 4 个词：欠拟合、合适拟合、过拟合、正则化。它们对应“学不够”“学得刚好”“学过头”“给模型加约束”。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>模型太简单</strong>
+              <span>学不到数据中的主要趋势，训练集和新样本都表现差。</span>
+            </div>
+            <div class="flow-node">
+              <strong>模型复杂适中</strong>
+              <span>既能抓住主要模式，也不会过度追踪噪声。</span>
+            </div>
+            <div class="flow-node">
+              <strong>模型太复杂</strong>
+              <span>训练集上看起来很好，但在新样本上容易失真。</span>
+            </div>
+            <div class="flow-node">
+              <strong>加入正则化</strong>
+              <span>通过限制模型复杂度，抑制对训练噪声的过度记忆。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>欠拟合</strong>
+            <span>模型过简单</span>
+          </div>
+          <div class="formula">
+            <strong>过拟合</strong>
+            <span>模型过复杂</span>
+          </div>
+          <div class="formula">
+            <strong>正则化</strong>
+            <span>L + λΩ(θ)</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先看训练集</h3>
+            <p>如果连训练集都学不好，通常是欠拟合；如果训练集很好但新样本很差，通常是过拟合。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再看验证集</h3>
+            <p>泛化能力不是看训练集成绩，而是看模型在没见过的数据上是否仍然稳定。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后控制复杂度</h3>
+            <p>正则化、减少模型自由度或增加数据，都是抑制过拟合的常见方法。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>欠拟合是没学到规律，过拟合是把噪声也学进去了，正则化是在提醒模型“别学太过”。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>合适模型</span>
+            <span><i class="c2"></i>样本点</span>
+            <span><i class="c3"></i>泛化更好</span>
+            <span><i class="c4"></i>过拟合风险</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Fit Comparison</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>模型复杂度怎么看</h2>
+
+        <div class="triple-grid">
+          <div class="plot">
+            <div class="plot-label"><span>欠拟合</span><span>模型太简单，抓不住趋势</span></div>
+            <canvas id="underfit" width="320" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>合适拟合</span><span>抓住主要趋势，不过度摆动</span></div>
+            <canvas id="goodfit" width="320" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>过拟合</span><span>训练集很好，但曲线过于扭曲</span></div>
+            <canvas id="overfit" width="320" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="triple-grid">
+          <div class="card">
+            <h3>欠拟合</h3>
+            <p>模型自由度太低，只能画出过于粗糙的形状，因此连训练数据的主趋势都没学到。</p>
+          </div>
+          <div class="card">
+            <h3>合适拟合</h3>
+            <p>模型足够表达主要规律，但不会为了贴合每个训练点而产生不必要的剧烈摆动。</p>
+          </div>
+          <div class="card">
+            <h3>过拟合</h3>
+            <p>模型把训练集里的随机波动也当成了规律，所以表面上更“贴点”，实际泛化更差。</p>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>比较模型时，不要只看它有没有穿过更多训练点，而要看它是否抓住了真正稳定的趋势。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Validation And Regularization</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>为什么需要正则化</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>训练误差 vs 验证误差</span><span>过拟合时验证误差反而上升</span></div>
+            <canvas id="trainVal" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>正则化效果</span><span>让模型更平滑，别追噪声</span></div>
+            <canvas id="regularized" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>验证误差为什么重要</strong>
+            <span>训练误差一直下降并不一定是好事，如果验证误差开始上升，往往说明模型已经在记住训练集细节了。</span>
+          </div>
+          <div class="mini-card">
+            <strong>正则化在做什么</strong>
+            <span>它会给复杂参数一个额外代价，鼓励模型选择更平滑、更简单的表达方式，而不是无限增大复杂度。</span>
+          </div>
+          <div class="mini-card">
+            <strong>怎么理解 λ</strong>
+            <span>`λ` 越大，约束越强；过小可能压不住过拟合，过大又可能让模型变得过于保守。</span>
+          </div>
+          <div class="mini-card">
+            <strong>和前面内容的关系</strong>
+            <span>损失函数负责衡量错误，正则化是在损失里额外加入“复杂度代价”，帮助模型兼顾拟合和泛化。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>正则化不是让模型变差，而是防止模型把训练集噪声误当成真正规律，从而换来更好的泛化表现。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    const samplePoints = [
+      [0.08, 0.34], [0.16, 0.42], [0.24, 0.48], [0.34, 0.52], [0.42, 0.58],
+      [0.52, 0.62], [0.64, 0.56], [0.76, 0.46], [0.86, 0.38]
+    ];
+
+    function drawSamples(ctx, width, height, margin) {
+      samplePoints.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawCurve(canvasId, color, fn, label, labelColor) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 12, bottom: 24, left: 26 };
+      drawGrid(ctx, width, height, margin);
+      drawSamples(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 140; i += 1) {
+        const u = i / 140;
+        const v = fn(u);
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, label, 14, 20, labelColor || color);
+    }
+
+    function drawUnderfit() {
+      drawCurve("underfit", "#b25454", (u) => 0.32 + 0.16 * u, "趋势太粗糙", "#b25454");
+    }
+
+    function drawGoodfit() {
+      drawCurve(
+        "goodfit",
+        "#228b5f",
+        (u) => 0.25 + 0.40 * Math.sin(Math.PI * u * 0.95) * 0.55 + 0.08 * u,
+        "抓住主趋势",
+        "#228b5f"
+      );
+    }
+
+    function drawOverfit() {
+      drawCurve(
+        "overfit",
+        "#6a4fd1",
+        (u) => 0.48 + 0.18 * Math.sin(7.5 * Math.PI * u) + 0.06 * Math.sin(15 * Math.PI * u),
+        "过度贴合训练点",
+        "#6a4fd1"
+      );
+    }
+
+    function drawTrainVal() {
+      const canvas = document.getElementById("trainVal");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+
+      const drawLine = (color, fn) => {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        for (let i = 0; i <= 140; i += 1) {
+          const u = i / 140;
+          const v = fn(u);
+          const p = mapPoint(u, v, width, height, margin);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      drawLine("#6a4fd1", (u) => 0.84 * Math.exp(-2.8 * u) + 0.08);
+      drawLine("#b25454", (u) => 0.70 - 0.82 * u + 0.92 * u * u);
+
+      const splitX = mapPoint(0.62, 0.1, width, height, margin).x;
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(splitX, margin.top);
+      ctx.lineTo(splitX, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "训练误差", 18, 20, "#6a4fd1");
+      drawText(ctx, "验证误差", 90, 20, "#b25454");
+      drawText(ctx, "开始过拟合", splitX - 26, 36, "#228b5f");
+    }
+
+    function drawRegularized() {
+      const canvas = document.getElementById("regularized");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawSamples(ctx, width, height, margin);
+
+      const plot = (color, fn, dash) => {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        if (dash) ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        for (let i = 0; i <= 140; i += 1) {
+          const u = i / 140;
+          const v = fn(u);
+          const p = mapPoint(u, v, width, height, margin);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      plot("#b25454", (u) => 0.48 + 0.18 * Math.sin(7.5 * Math.PI * u) + 0.06 * Math.sin(15 * Math.PI * u), true);
+      plot("#228b5f", (u) => 0.27 + 0.36 * Math.sin(Math.PI * u * 0.98) * 0.56 + 0.06 * u, false);
+
+      drawText(ctx, "未正则化", 18, 20, "#b25454");
+      drawText(ctx, "正则化后", 96, 20, "#228b5f");
+    }
+
+    function renderAll() {
+      drawUnderfit();
+      drawGoodfit();
+      drawOverfit();
+      drawTrainVal();
+      drawRegularized();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

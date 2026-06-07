@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>监督学习基础课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #3b63c6;
+      --accent-2: #ca7a1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(59, 99, 198, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(202, 122, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(59, 99, 198, 0.2);
+      background: rgba(59, 99, 198, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.18fr 0.82fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(59, 99, 198, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .overview-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .overview-item {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(123, 103, 73, 0.10);
+    }
+
+    .overview-item b {
+      color: var(--accent-1);
+      font-weight: 700;
+    }
+
+    .overview-item span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(59, 99, 198, 0.6), rgba(59, 99, 198, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #3556aa;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">Supervised Learning Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>监督学习基础</h1>
+            <p class="lead" style="margin-top: 12px;">
+              监督学习最核心的事情，是用带标签的数据学习一个从输入到输出的映射。
+              你可以先把它理解成：给模型大量“题目和答案”，让它学会从新题目中给出合理预测。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              入门时先抓住 4 个词：数据、模型、损失、泛化。后面的线性回归、逻辑回归、神经网络，都只是围绕这条主线展开。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>输入样本与标签</strong>
+              <span>每个训练样本都包含输入 `x` 和目标输出 `y`。</span>
+            </div>
+            <div class="flow-node">
+              <strong>模型学习映射</strong>
+              <span>模型尝试用参数化函数把 `x` 映射到 `y`。</span>
+            </div>
+            <div class="flow-node">
+              <strong>不断减小损失</strong>
+              <span>训练过程本质上是在调整参数，让预测更接近真实标签。</span>
+            </div>
+            <div class="flow-node">
+              <strong>最终追求泛化</strong>
+              <span>不仅训练集上正确，还要在新样本上保持表现。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>基本形式</strong>
+            <span>y ≈ f(x; θ)</span>
+          </div>
+          <div class="formula">
+            <strong>训练目标</strong>
+            <span>最小化损失 L</span>
+          </div>
+          <div class="formula">
+            <strong>最终要求</strong>
+            <span>新样本也能预测好</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先给带标签样本</h3>
+            <p>监督学习不是凭空猜规律，而是从“已有标准答案”的样本中提取模式。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再调整模型参数</h3>
+            <p>模型会不断修改参数 `θ`，让预测值更接近真实标签，这个接近程度由损失函数衡量。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后看泛化能力</h3>
+            <p>真正重要的不是把训练样本都记住，而是在没见过的新样本上依然预测得好。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>监督学习 = 用带标签的数据学一个映射，并希望它在新样本上仍然表现良好。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>输入 / 特征</span>
+            <span><i class="c2"></i>标签 / 预测</span>
+            <span><i class="c3"></i>较好泛化</span>
+            <span><i class="c4"></i>过拟合风险</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Task Types And Data</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>监督学习看什么</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>回归</span><span>输出连续值，如房价预测</span></div>
+            <canvas id="regression" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>分类</span><span>输出离散类别，如垃圾邮件识别</span></div>
+            <canvas id="classification" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>回归任务</h3>
+            <p>当输出是连续数值时，问题通常属于回归。例如房价、温度、销量预测。图中的拟合线表示模型试图捕捉整体变化趋势。</p>
+          </div>
+          <div class="card">
+            <h3>分类任务</h3>
+            <p>当输出是类别标签时，问题通常属于分类。例如是否为垃圾邮件、图像属于哪一类。图中的分界线表示模型在不同类别之间做划分。</p>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>数据</strong>
+            <span>输入也叫特征，标签也叫目标值。监督学习一定依赖标签，标签就是老师给的标准答案。</span>
+          </div>
+          <div class="mini-card">
+            <strong>模型</strong>
+            <span>模型是从输入到输出的函数，可以很简单，也可以很复杂。线性回归、逻辑回归、神经网络都属于模型。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>先建立“监督学习到底在解什么问题”的直觉。不要急着记算法名称，先判断当前任务是回归还是分类。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Loss And Generalization</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>监督学习怎么变好</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>训练过程</span><span>损失下降说明模型在变好</span></div>
+            <canvas id="lossCurve" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>泛化问题</span><span>过拟合会让验证表现变差</span></div>
+            <canvas id="generalization" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>损失函数</strong>
+            <span>损失衡量预测错得有多严重。训练的本质，就是不断调整参数，让损失尽量变小。</span>
+          </div>
+          <div class="mini-card">
+            <strong>泛化</strong>
+            <span>泛化表示模型对新样本的表现。机器学习不是背题，而是学规律，所以泛化能力比训练集成绩更重要。</span>
+          </div>
+          <div class="mini-card">
+            <strong>为什么会过拟合</strong>
+            <span>当模型太复杂或训练太久时，它可能开始记住训练集细节，导致训练误差继续下降，但验证误差反而上升。</span>
+          </div>
+          <div class="mini-card">
+            <strong>入门重点</strong>
+            <span>现在不必先记复杂推导，先把“损失是什么、模型怎么更新、为什么要看验证集”这条主线建立起来。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>监督学习不是只看训练集上有没有学会，而是看模型能不能把学到的规律迁移到新样本上，这就是泛化。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin, showCenter) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      if (showCenter) {
+        const midX = margin.left + innerW / 2;
+        ctx.beginPath();
+        ctx.moveTo(midX, margin.top);
+        ctx.lineTo(midX, height - margin.bottom);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawLegendItem(ctx, x, y, label, color, type) {
+      ctx.save();
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (type === "line" || type === "dashed-line") {
+        ctx.strokeStyle = color;
+        ctx.setLineDash(type === "dashed-line" ? [8, 5] : []);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 18, y);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x + 9, y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, x + 26, y);
+      ctx.restore();
+    }
+
+    function drawLegendPanel(ctx, x, y, width, height, items) {
+      ctx.save();
+      ctx.fillStyle = "rgba(255, 252, 246, 0.9)";
+      ctx.strokeStyle = "rgba(123, 103, 73, 0.14)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      items.forEach((item, index) => {
+        drawLegendItem(ctx, x + 12, y + 14 + index * 18, item.label, item.color, item.type);
+      });
+    }
+
+    function drawTextbookAxes(ctx, width, height, margin, options) {
+      const { xLabel, yLabel, xTicks = [], yTicks = [] } = options;
+      const left = margin.left;
+      const right = width - margin.right;
+      const top = margin.top;
+      const bottom = height - margin.bottom;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.46)";
+      ctx.fillStyle = "rgba(31, 42, 55, 0.46)";
+      ctx.lineWidth = 1.3;
+
+      ctx.beginPath();
+      ctx.moveTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(right, bottom);
+      ctx.lineTo(right - 7, bottom - 4);
+      ctx.lineTo(right - 7, bottom + 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(left, bottom);
+      ctx.lineTo(left, top);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left - 4, top + 7);
+      ctx.lineTo(left + 4, top + 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.36)";
+      ctx.fillStyle = "#6b675e";
+      ctx.lineWidth = 1;
+      ctx.font = "11px Segoe UI";
+
+      xTicks.forEach(({ u, label }) => {
+        const x = left + u * (right - left);
+        ctx.beginPath();
+        ctx.moveTo(x, bottom);
+        ctx.lineTo(x, bottom + 5);
+        ctx.stroke();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText(label, x, bottom + 8);
+      });
+
+      yTicks.forEach(({ v, label }) => {
+        const y = bottom - v * (bottom - top);
+        ctx.beginPath();
+        ctx.moveTo(left - 5, y);
+        ctx.lineTo(left, y);
+        ctx.stroke();
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, left - 8, y);
+      });
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "#6b675e";
+      ctx.font = "12px Segoe UI";
+      ctx.textAlign = "center";
+      ctx.fillText(xLabel, left + (right - left) / 2, height - 6);
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = "#6b675e";
+      ctx.font = "12px Segoe UI";
+      ctx.textAlign = "center";
+      ctx.translate(14, top + (bottom - top) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(yLabel, 0, 0);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    function drawRegression() {
+      const canvas = document.getElementById("regression");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 58, right: 18, bottom: 38, left: 46 };
+      drawGrid(ctx, width, height, margin, false);
+
+      const pts = [
+        [0.08, 0.18], [0.15, 0.22], [0.24, 0.28], [0.31, 0.33], [0.42, 0.46],
+        [0.55, 0.54], [0.66, 0.67], [0.76, 0.73], [0.88, 0.84]
+      ];
+
+      ctx.save();
+      ctx.strokeStyle = "#3b63c6";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const u = i / 100;
+        const v = 0.12 + 0.78 * u;
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      pts.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#ca7a1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawLegendPanel(ctx, width - 130, 12, 114, 44, [
+        { label: "样本点", color: "#ca7a1b", type: "dot" },
+        { label: "拟合函数", color: "#3b63c6", type: "line" }
+      ]);
+      drawTextbookAxes(ctx, width, height, margin, {
+        xLabel: "输入特征 x",
+        yLabel: "目标值 y",
+        xTicks: [
+          { u: 0, label: "低" },
+          { u: 0.5, label: "中" },
+          { u: 1, label: "高" }
+        ],
+        yTicks: [
+          { v: 0, label: "低" },
+          { v: 0.5, label: "中" },
+          { v: 1, label: "高" }
+        ]
+      });
+    }
+
+    function drawClassification() {
+      const canvas = document.getElementById("classification");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 76, right: 18, bottom: 38, left: 46 };
+      drawGrid(ctx, width, height, margin, false);
+
+      const blue = [
+        [0.18, 0.78], [0.22, 0.68], [0.28, 0.74], [0.32, 0.58], [0.4, 0.64]
+      ];
+      const orange = [
+        [0.62, 0.28], [0.72, 0.36], [0.78, 0.22], [0.82, 0.44], [0.9, 0.32]
+      ];
+
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.lineWidth = 2.2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      const p1 = mapPoint(0.52, 0.95, width, height, margin);
+      const p2 = mapPoint(0.52, 0.05, width, height, margin);
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+      ctx.restore();
+
+      blue.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#3b63c6";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      orange.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#ca7a1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawLegendPanel(ctx, width - 130, 12, 114, 62, [
+        { label: "类别 A", color: "#3b63c6", type: "dot" },
+        { label: "类别 B", color: "#ca7a1b", type: "dot" },
+        { label: "决策边界", color: "#228b5f", type: "dashed-line" }
+      ]);
+      drawTextbookAxes(ctx, width, height, margin, {
+        xLabel: "特征 1",
+        yLabel: "特征 2",
+        xTicks: [
+          { u: 0, label: "低" },
+          { u: 0.5, label: "中" },
+          { u: 1, label: "高" }
+        ],
+        yTicks: [
+          { v: 0, label: "低" },
+          { v: 0.5, label: "中" },
+          { v: 1, label: "高" }
+        ]
+      });
+    }
+
+    function drawLossCurve() {
+      const canvas = document.getElementById("lossCurve");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 58, right: 18, bottom: 38, left: 46 };
+      drawGrid(ctx, width, height, margin, false);
+
+      ctx.save();
+      ctx.strokeStyle = "#3b63c6";
+      ctx.lineWidth = 2.3;
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i += 1) {
+        const u = i / 120;
+        const v = 0.85 * Math.exp(-3.2 * u) + 0.08;
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      [0.12, 0.28, 0.5, 0.78].forEach((u) => {
+        const v = 0.85 * Math.exp(-3.2 * u) + 0.08;
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#ca7a1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      drawLegendPanel(ctx, width - 130, 12, 114, 44, [
+        { label: "训练损失", color: "#3b63c6", type: "line" },
+        { label: "采样点", color: "#ca7a1b", type: "dot" }
+      ]);
+      drawTextbookAxes(ctx, width, height, margin, {
+        xLabel: "训练轮次",
+        yLabel: "损失值",
+        xTicks: [
+          { u: 0, label: "初期" },
+          { u: 0.5, label: "中期" },
+          { u: 1, label: "后期" }
+        ],
+        yTicks: [
+          { v: 0, label: "低" },
+          { v: 0.5, label: "中" },
+          { v: 1, label: "高" }
+        ]
+      });
+    }
+
+    function drawGeneralization() {
+      const canvas = document.getElementById("generalization");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 76, right: 18, bottom: 38, left: 46 };
+      drawGrid(ctx, width, height, margin, false);
+
+      const drawLine = (color, generator) => {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        for (let i = 0; i <= 120; i += 1) {
+          const u = i / 120;
+          const v = generator(u);
+          const p = mapPoint(u, v, width, height, margin);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      drawLine("#3b63c6", (u) => 0.8 * Math.exp(-2.8 * u) + 0.08);
+      drawLine("#b25454", (u) => 0.72 - 0.95 * u + 0.9 * u * u);
+
+      const splitX = mapPoint(0.63, 0.1, width, height, margin).x;
+      ctx.save();
+      ctx.strokeStyle = "#228b5f";
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(splitX, margin.top);
+      ctx.lineTo(splitX, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+
+      drawLegendPanel(ctx, width - 130, 12, 114, 62, [
+        { label: "训练误差", color: "#3b63c6", type: "line" },
+        { label: "验证误差", color: "#b25454", type: "line" },
+        { label: "过拟合分界", color: "#228b5f", type: "dashed-line" }
+      ]);
+      drawText(ctx, "开始过拟合", splitX - 28, margin.top - 14, "#228b5f");
+      drawTextbookAxes(ctx, width, height, margin, {
+        xLabel: "训练进程",
+        yLabel: "误差大小",
+        xTicks: [
+          { u: 0, label: "早期" },
+          { u: 0.5, label: "中期" },
+          { u: 1, label: "后期" }
+        ],
+        yTicks: [
+          { v: 0, label: "低" },
+          { v: 0.5, label: "中" },
+          { v: 1, label: "高" }
+        ]
+      });
+    }
+
+    function renderAll() {
+      drawRegression();
+      drawClassification();
+      drawLossCurve();
+      drawGeneralization();
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

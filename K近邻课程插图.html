@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K 近邻课程插图</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --ink: #1f2a37;
+      --muted: #617082;
+      --grid: rgba(87, 101, 122, 0.12);
+      --accent-1: #4f63c7;
+      --accent-2: #cf7b1b;
+      --accent-3: #228b5f;
+      --danger: #b25454;
+      --panel-shadow: 0 18px 48px rgba(73, 56, 30, 0.08);
+      --serif: "Georgia", "Times New Roman", "Songti SC", "STSong", serif;
+      --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(79, 99, 199, 0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(207, 123, 27, 0.06), transparent 18%),
+        linear-gradient(180deg, #faf6ef 0%, var(--paper) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.55;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.45));
+    }
+
+    .page {
+      width: min(1100px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      margin: 0 auto 18px;
+      width: min(860px, 100%);
+      color: #726a5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet {
+      position: relative;
+      width: min(860px, 100%);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 24px;
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(123, 103, 73, 0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,252,246,0.95));
+      box-shadow: var(--panel-shadow);
+      overflow: hidden;
+    }
+
+    .sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.42), transparent 35%);
+      pointer-events: none;
+    }
+
+    .sheet-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(79, 99, 199, 0.2);
+      background: rgba(79, 99, 199, 0.06);
+      color: var(--accent-1);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 15px 0 0 var(--accent-2), 30px 0 0 var(--accent-3);
+      margin-right: 32px;
+      transform: translateY(1px);
+    }
+
+    .sheet-index {
+      padding-top: 4px;
+      color: #7f786c;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: var(--serif);
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.04;
+      margin-top: 6px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .lead,
+    .card p,
+    .step p,
+    .mini-card span,
+    .poster-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .hero-grid,
+    .steps-grid,
+    .two-col,
+    .mini-grid,
+    .bottom-grid,
+    .triple-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col,
+    .mini-grid,
+    .bottom-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .formula,
+    .step,
+    .plot,
+    .mini-card,
+    .poster-note {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.58);
+      padding: 14px 16px;
+    }
+
+    .formula strong,
+    .mini-card strong,
+    .poster-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #5d4a34;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .formula span {
+      font-family: var(--serif);
+      font-size: 23px;
+      color: #2d2f34;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(79, 99, 199, 0.10);
+      color: var(--accent-1);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .plot {
+      padding: 12px 12px 10px;
+    }
+
+    .plot-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #6d6458;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(123,103,73,0.12);
+      background: rgba(255,255,255,0.56);
+      color: #6b675e;
+      font-size: 13px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(123, 103, 73, 0.12);
+      background: rgba(255,255,255,0.55);
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      bottom: -14px;
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(180deg, rgba(79, 99, 199, 0.6), rgba(79, 99, 199, 0.12));
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #4960b9;
+      font-size: 14px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .poster-note {
+      background: rgba(255, 252, 246, 0.78);
+    }
+
+    .capture-tip {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 0 4px 6px;
+      color: #7b7468;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .c1 { background: var(--accent-1); }
+    .c2 { background: var(--accent-2); }
+    .c3 { background: var(--accent-3); }
+    .c4 { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .sheet {
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .steps-grid,
+      .two-col,
+      .mini-grid,
+      .bottom-grid,
+      .formula-row,
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100vw - 18px, 1100px);
+        padding-top: 16px;
+      }
+
+      .sheet {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      canvas {
+        height: 185px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-title">K Nearest Neighbors Cards · 3:4 Poster Notes</div>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Machine Learning Visual Notes</div>
+          <div class="sheet-index">Card 01 / 03</div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <h1>K 近邻</h1>
+            <p class="lead" style="margin-top: 12px;">
+              `KNN` 的核心思想很直白：来了一个新样本，就看看它周围最近的 `k` 个已知样本属于哪一类，再按多数投票决定结果。
+            </p>
+            <p class="lead" style="margin-top: 10px;">
+              它和前面的线性模型、树模型不同，几乎没有显式训练过程，更像“先把样本记住，预测时再现场比较谁离得近”。
+            </p>
+          </div>
+
+          <div class="flow">
+            <div class="flow-node">
+              <strong>先算距离</strong>
+              <span>给一个新点，先找它离哪些已知样本最近。</span>
+            </div>
+            <div class="flow-node">
+              <strong>再看最近的 k 个邻居</strong>
+              <span>不是看全部样本，而是只看最靠近它的一小圈局部信息。</span>
+            </div>
+            <div class="flow-node">
+              <strong>然后多数投票</strong>
+              <span>邻居里哪一类更多，新样本通常就判成哪一类。</span>
+            </div>
+            <div class="flow-node">
+              <strong>k 会影响边界</strong>
+              <span>`k` 太小容易敏感，`k` 太大又可能把局部结构抹平。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula-row">
+          <div class="formula">
+            <strong>核心动作</strong>
+            <span>找最近邻</span>
+          </div>
+          <div class="formula">
+            <strong>核心参数</strong>
+            <span>k 的大小</span>
+          </div>
+          <div class="formula">
+            <strong>分类方式</strong>
+            <span>多数投票</span>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-index-badge">1</div>
+            <h3>先理解“近”</h3>
+            <p>模型先比较距离，所以特征尺度会直接影响谁算邻居。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">2</div>
+            <h3>再理解“局部”</h3>
+            <p>KNN 更依赖局部结构，不是学一条全局规则，而是看附近样本如何分布。</p>
+          </div>
+          <div class="step">
+            <div class="step-index-badge">3</div>
+            <h3>最后理解 k 的影响</h3>
+            <p>小 `k` 更灵活也更容易抖，大 `k` 更平滑但可能忽略细节。</p>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="poster-note">
+            <strong>一句话记忆</strong>
+            <span>`KNN` 不是先学出一个复杂模型，而是预测时看“你更像你附近的谁”。</span>
+          </div>
+          <div class="legend">
+            <span><i class="c1"></i>类别 A</span>
+            <span><i class="c2"></i>类别 B</span>
+            <span><i class="c3"></i>查询样本</span>
+            <span><i class="c4"></i>邻居圈</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Nearest Vote</div>
+          <div class="sheet-index">Card 02 / 03</div>
+        </div>
+
+        <h2>K 近邻怎么做判断</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>新样本与邻居</span><span>先找最近的一圈样本</span></div>
+            <canvas id="knnNeighbors" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>多数投票</span><span>邻居里谁多就更像谁</span></div>
+            <canvas id="knnVote" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="triple-grid">
+          <div class="card">
+            <h3>它为什么直观</h3>
+            <p>你可以直接把它理解成“相似的人更可能属于同一类”，几乎不需要复杂公式也能建立直觉。</p>
+          </div>
+          <div class="card">
+            <h3>它为什么不像传统训练</h3>
+            <p>模型并没有学一个显式参数，而是把训练集保留下来，到预测时才计算邻居关系。</p>
+          </div>
+          <div class="card">
+            <h3>它为什么怕尺度不一致</h3>
+            <p>如果某个特征数值范围特别大，距离计算就会被它主导，所以标准化常常很重要。</p>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>K 近邻的预测逻辑不复杂，但它把“距离”和“局部结构”放得非常重要，所以看懂邻居分布就是理解它的关键。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <div class="eyebrow">Effect Of K</div>
+          <div class="sheet-index">Card 03 / 03</div>
+        </div>
+
+        <h2>k 的大小为什么重要</h2>
+
+        <div class="two-col">
+          <div class="plot">
+            <div class="plot-label"><span>k 小</span><span>边界灵活但更容易抖动</span></div>
+            <canvas id="smallK" width="520" height="205"></canvas>
+          </div>
+          <div class="plot">
+            <div class="plot-label"><span>k 大</span><span>边界更平滑但更容易过度平均</span></div>
+            <canvas id="largeK" width="520" height="205"></canvas>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>k 太小</strong>
+            <span>模型对单个噪声点特别敏感，边界容易出现很多局部折线，看起来很“碎”。</span>
+          </div>
+          <div class="mini-card">
+            <strong>k 太大</strong>
+            <span>模型会把周围更大范围的样本都平均进来，局部细节容易被抹掉，边界会更钝。</span>
+          </div>
+          <div class="mini-card">
+            <strong>优点</strong>
+            <span>实现简单、直观强，对多类别分类也很自然，适合做入门和局部结构明显的问题。</span>
+          </div>
+          <div class="mini-card">
+            <strong>限制</strong>
+            <span>数据量大时预测会慢，高维空间里“谁近谁远”也会变得不那么可靠，这就是维度灾难的直觉来源。</span>
+          </div>
+        </div>
+
+        <div class="poster-note">
+          <strong>这张卡片的重点</strong>
+          <span>理解 `KNN` 时，不要只记住“邻居投票”，还要记住 `k` 在控制模型的平滑程度，这一点和偏差-方差权衡很像。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capture-tip">
+      建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例，适合整理成讲义图片或 PPT 素材。
+    </div>
+  </div>
+
+  <script>
+    function setupCanvas(canvas) {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(ratio, ratio);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function drawGrid(ctx, width, height, margin) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.strokeStyle = "rgba(96, 112, 130, 0.14)";
+      ctx.lineWidth = 1;
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      for (let i = 0; i <= 6; i += 1) {
+        const x = margin.left + (innerW * i) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 4; i += 1) {
+        const y = margin.top + (innerH * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(31, 42, 55, 0.28)";
+      ctx.beginPath();
+      ctx.moveTo(margin.left, height - margin.bottom);
+      ctx.lineTo(width - margin.right, height - margin.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, height - margin.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawText(ctx, text, x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color || "#5f6670";
+      ctx.font = "13px Segoe UI";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function mapPoint(u, v, width, height, margin) {
+      return {
+        x: margin.left + u * (width - margin.left - margin.right),
+        y: height - margin.bottom - v * (height - margin.top - margin.bottom)
+      };
+    }
+
+    const pointsA = [[0.18,0.76],[0.24,0.68],[0.30,0.82],[0.38,0.66],[0.44,0.74],[0.52,0.58]];
+    const pointsB = [[0.58,0.42],[0.66,0.32],[0.74,0.26],[0.82,0.38],[0.76,0.48],[0.90,0.30]];
+    const query = [0.55, 0.56];
+
+    function drawBasePoints(ctx, width, height, margin) {
+      pointsA.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#4f63c7";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      pointsB.forEach(([u, v]) => {
+        const p = mapPoint(u, v, width, height, margin);
+        ctx.save();
+        ctx.fillStyle = "#cf7b1b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    function drawQuery(ctx, width, height, margin) {
+      const p = mapPoint(query[0], query[1], width, height, margin);
+      ctx.save();
+      ctx.fillStyle = "#228b5f";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return p;
+    }
+
+    function drawKnnNeighbors() {
+      const canvas = document.getElementById("knnNeighbors");
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawBasePoints(ctx, width, height, margin);
+      const p = drawQuery(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = "#b25454";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 44, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, "绿点 = 新样本", 18, 20, "#228b5f");
+      drawText(ctx, "红圈 = 只看最近的一圈邻居", 18, 38, "#b25454");
+    }
+
+    function drawKnnVote() {
+      const canvas = document.getElementById("knnVote");
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const bars = [
+        { label: "类别 A", value: 2, x: 110, color: "#4f63c7" },
+        { label: "类别 B", value: 3, x: 250, color: "#cf7b1b" }
+      ];
+      const baseY = height - 34;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(31,42,55,0.28)";
+      ctx.beginPath();
+      ctx.moveTo(32, baseY);
+      ctx.lineTo(width - 22, baseY);
+      ctx.stroke();
+      ctx.restore();
+
+      bars.forEach((bar) => {
+        const h = bar.value * 34;
+        ctx.save();
+        ctx.fillStyle = bar.color === "#4f63c7" ? "rgba(79, 99, 199, 0.18)" : "rgba(207, 123, 27, 0.18)";
+        ctx.strokeStyle = bar.color;
+        ctx.lineWidth = 2;
+        ctx.fillRect(bar.x, baseY - h, 70, h);
+        ctx.strokeRect(bar.x, baseY - h, 70, h);
+        ctx.restore();
+        drawText(ctx, bar.label, bar.x + 6, baseY + 20, bar.color);
+        drawText(ctx, String(bar.value), bar.x + 30, baseY - h - 10, bar.color);
+      });
+
+      drawText(ctx, "若 k = 5，则 3 比 2 多 -> 判为类别 B", 18, 22, "#cf7b1b");
+    }
+
+    function drawBoundaryShape(canvasId, smooth) {
+      const canvas = document.getElementById(canvasId);
+      const { ctx, width, height } = setupCanvas(canvas);
+      const margin = { top: 18, right: 16, bottom: 24, left: 32 };
+      drawGrid(ctx, width, height, margin);
+      drawBasePoints(ctx, width, height, margin);
+
+      ctx.save();
+      ctx.strokeStyle = smooth ? "#228b5f" : "#b25454";
+      ctx.lineWidth = 2.2;
+      if (!smooth) ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i += 1) {
+        const u = i / 120;
+        const v = smooth
+          ? 0.56 - 0.22 * u + 0.05 * Math.sin(2 * Math.PI * u)
+          : 0.60 - 0.28 * u + 0.11 * Math.sin(5 * Math.PI * u);
+        const p = mapPoint(u, v, width, height, margin);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      drawText(ctx, smooth ? "k 大 -> 边界更平滑" : "k 小 -> 边界更敏感", 18, 20, smooth ? "#228b5f" : "#b25454");
+    }
+
+    function renderAll() {
+      drawKnnNeighbors();
+      drawKnnVote();
+      drawBoundaryShape("smallK", false);
+      drawBoundaryShape("largeK", true);
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", renderAll);
+  </script>
+</body>
+</html>

@@ -56,9 +56,9 @@
         <div class="plot"><div class="plot-label"><span>特征图响应</span><span>边缘位置会被高亮</span></div><canvas id="feature" width="520" height="205"></canvas></div>
       </div>
       <div class="triple">
-        <div class="card"><h3>为什么适合图像</h3><p>因为图像中“附近像素一起看”才有意义，卷积天然利用了这种局部结构。</p></div>
-        <div class="card"><h3>为什么参数少</h3><p>同一个卷积核在不同位置重复使用，而不是为每个像素位置单独学一套权重。</p></div>
-        <div class="card"><h3>特征图是什么</h3><p>可以把它理解成“某种图案在各个位置上出现得有多强”的响应地图。</p></div>
+        <div class="card"><h3>为什么适合图像</h3><p>图像中“附近像素一起看”才有意义，卷积天然利用了这种局部结构。想象你在看一张照片，判断某个区域是边缘还是纹理，你只需要看它周围一小圈像素就够了，不需要同时看整张图。卷积核正是这样做的——它只关注局部邻域，逐块扫描，把有意义的局部模式一个个挑出来。</p></div>
+        <div class="card"><h3>为什么参数少</h3><p>同一个卷积核在不同位置重复使用，而不是为每个像素位置单独学一套权重。比如一个 3×3 的卷积核只有 9 个参数，但它会在整张图上滑动几百次，每次都复用同一组权重。这种参数共享不仅大大减少了参数量，还让模型对平移更鲁棒——不管一条边缘出现在图的左上角还是右下角，同一个卷积核都能检测到它。</p></div>
+        <div class="card"><h3>特征图是什么</h3><p>可以把它理解成“某种图案在各个位置上出现得有多强”的响应地图。比如一个对水平边缘敏感的卷积核，它生成的特征图会在图像中所有水平边缘的位置亮起来，其他位置则很暗。不同的卷积核就像不同的“探测器”，有的找竖线、有的找角点、有的找色块，它们各自输出一张特征图，组合起来就构成了网络对图像的初步理解。</p></div>
       </div>
       <div class="note"><strong>这张卡片的重点</strong><span>卷积层不是直接识别猫狗，而是在回答“这张图哪里像某种局部模式”。</span></div>
     </div></section>
@@ -70,12 +70,12 @@
         <div class="plot"><div class="plot-label"><span>层级特征</span><span>边缘 -> 纹理 -> 部件 -> 类别</span></div><canvas id="hier" width="520" height="205"></canvas></div>
       </div>
       <div class="mini-grid">
-        <div class="mini"><strong>优点</strong><span>善于处理图像、视频等有强空间结构的数据。</span></div>
-        <div class="mini"><strong>池化作用</strong><span>降低分辨率、保留强响应，并增强一定程度的位置鲁棒性。</span></div>
-        <div class="mini"><strong>限制</strong><span>对长距离依赖的全局关系建模不如注意力机制自然。</span></div>
-        <div class="mini"><strong>应用</strong><span>图像分类、目标检测、分割、医学影像、工业视觉。</span></div>
+        <div class="mini"><strong>优点</strong><span>善于处理图像、视频等有强空间结构的数据。卷积的局部感受野和参数共享让它在图像任务上既高效又有效，比全连接网络参数少得多，却更容易学到有用的空间模式。</span></div>
+        <div class="mini"><strong>池化作用</strong><span>降低分辨率、保留强响应，并增强一定程度的位置鲁棒性。最常见的是最大池化，它只保留每个小区域里最突出的那个值；也有平均池化，取区域均值。池化让特征图变小、计算变快，同时让模型对微小的位置偏移不那么敏感。</span></div>
+        <div class="mini"><strong>限制</strong><span>对长距离依赖的全局关系建模不如注意力机制自然。卷积核的感受野有限，要关联远处的像素只能靠堆叠很多层来间接扩大范围，而注意力机制可以一步到位地建立任意两个位置之间的联系。</span></div>
+        <div class="mini"><strong>应用</strong><span>图像分类、目标检测、分割、医学影像、工业视觉。几乎 wherever 有空间结构的数据，CNN 都能发挥优势，比如卫星图识别、自动驾驶中的车道检测、人脸识别等。</span></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>CNN 的真正价值不只是卷积本身，而是它让网络学会了“从局部模式逐步拼成全局语义”。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>CNN 的真正价值不只是卷积本身，而是它让网络学会了“从局部模式逐步拼成全局语义”。浅层卷积核找边缘和色块，中层组合出纹理和形状，深层再拼成物体部件和语义概念——这种层层抽象的层级结构，才是 CNN 处理图像如此有效的根本原因。</span></div>
     </div></section>
     <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
   </div>

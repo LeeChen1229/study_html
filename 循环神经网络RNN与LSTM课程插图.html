@@ -56,11 +56,11 @@
         <div class="plot"><div class="plot-label"><span>长期依赖问题</span><span>信息传得越远越容易衰减</span></div><canvas id="longdep" width="520" height="205"></canvas></div>
       </div>
       <div class="triple">
-        <div class="card"><h3>为什么适合语言</h3><p>一句话里的后续词往往依赖前面的上下文，RNN 天生按顺序处理。</p></div>
-        <div class="card"><h3>为什么训练困难</h3><p>误差信号跨很多时间步反传时，会出现梯度消失或爆炸。</p></div>
-        <div class="card"><h3>什么时候不够用</h3><p>当依赖距离很长、并行需求很高时，RNN 的顺序结构会成为瓶颈。</p></div>
+        <div class="card"><h3>为什么适合语言</h3><p>一句话里的后续词往往依赖前面的上下文，RNN 天生按顺序处理。比如"我喜欢吃___"，你要填的词很大程度上取决于前面出现了什么。RNN 的隐状态就像一个不断更新的笔记本，每读一个新词就更新一次笔记，后面的预测就能参考之前积累的上下文信息。</p></div>
+        <div class="card"><h3>为什么训练困难</h3><p>误差信号跨很多时间步反传时，会出现梯度消失或爆炸。具体来说，如果序列有 100 步，梯度要连乘 100 次权重矩阵——每次乘一个小于 1 的数，梯度就迅速缩到接近零（消失）；每次乘一个大于 1 的数，梯度就指数级膨胀（爆炸）。结果是，远处的信息要么学不到，要么把训练搞崩。</p></div>
+        <div class="card"><h3>什么时候不够用</h3><p>当依赖距离很长、并行需求很高时，RNN 的顺序结构会成为瓶颈。比如一段话开头的主语要和结尾的谓语保持一致，中间隔了几十个词，普通 RNN 很难把信息稳定地传过去。另外，RNN 必须一步一步算，没法像 Transformer 那样把整个序列并行处理，训练速度也因此受限。</p></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>RNN 的优势和限制都来自同一件事：它把时间顺序真的“串起来”了。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>RNN 的优势和限制都来自同一件事：它把时间顺序真的“串起来”了。这让 RNN 天然适合处理序列，但也意味着信息必须一步一步传递，远了就容易丢。理解了这个根本矛盾，你就知道为什么后来需要 LSTM 和 Transformer 来补救了。</span></div>
     </div></section>
     <section class="sheet"><div class="sheet-inner">
       <div class="sheet-head"><div class="eyebrow">LSTM Gates</div><div class="sheet-index">Card 03 / 03</div></div>

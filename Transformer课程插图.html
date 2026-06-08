@@ -56,11 +56,11 @@
         <div class="plot"><div class="plot-label"><span>多头注意力</span><span>不同头关注不同关系</span></div><canvas id="multi" width="520" height="205"></canvas></div>
       </div>
       <div class="triple">
-        <div class="card"><h3>为什么比 RNN 更强</h3><p>长距离依赖不需要经过很多步传递，相关位置可以直接连起来。</p></div>
-        <div class="card"><h3>为什么要多头</h3><p>一个头可能更关注语法关系，另一个头可能更关注语义或位置模式。</p></div>
-        <div class="card"><h3>注意力不是记忆库</h3><p>它更像一套动态路由机制，决定当前表示要从哪里吸收信息。</p></div>
+        <div class="card"><h3>为什么比 RNN 更强</h3><p>长距离依赖不需要经过很多步传递，相关位置可以直接连起来。在 RNN 里，第 1 个词要影响第 50 个词，信息必须经过 49 次传递，每一步都可能丢失；而在 Transformer 里，第 1 个词和第 50 个词之间的注意力权重是直接计算的，距离不影响信息传递的质量。</p></div>
+        <div class="card"><h3>为什么要多头</h3><p>一个头可能更关注语法关系，另一个头可能更关注语义或位置模式。多头注意力就像让多个人同时从不同角度读同一段话：有人专门盯主谓关系，有人关注指代消解，有人看情感色彩。最后把这些不同视角的观察拼在一起，表示就比单头丰富得多。</p></div>
+        <div class="card"><h3>注意力不是记忆库</h3><p>它更像一套动态路由机制，决定当前表示要从哪里吸收信息。每个 token 并不是在"存储"别的 token 的内容，而是在根据当前任务的需要，动态地计算"我应该更关注谁"。这种路由是输入相关的，同样的序列在不同任务下注意力模式可能完全不同。</p></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>自注意力的本质不是“平均所有信息”，而是“有选择地聚合最相关的信息”。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>自注意力的本质不是“平均所有信息”，而是“有选择地聚合最相关的信息”。每个位置都会算出自己和其他所有位置的关联程度，然后按关联强弱来加权汇总，这样就能在一步之内拿到全局视野中最有用的部分。</span></div>
     </div></section>
     <section class="sheet"><div class="sheet-inner">
       <div class="sheet-head"><div class="eyebrow">Architecture</div><div class="sheet-index">Card 03 / 03</div></div>
@@ -70,12 +70,12 @@
         <div class="plot"><div class="plot-label"><span>堆叠结构</span><span>注意力层 + 前馈层反复叠加</span></div><canvas id="stack" width="520" height="205"></canvas></div>
       </div>
       <div class="mini-grid">
-        <div class="mini"><strong>优点</strong><span>全局依赖建模强、并行效率高、扩展到大规模训练更自然。</span></div>
-        <div class="mini"><strong>为什么能做大模型</strong><span>因为它的核心计算适合 GPU/TPU 并行，且上下文建模能力强。</span></div>
-        <div class="mini"><strong>限制</strong><span>标准注意力在超长序列上计算和显存开销大，因此后续有很多高效变体。</span></div>
-        <div class="mini"><strong>应用</strong><span>大语言模型、机器翻译、视觉 Transformer、多模态模型。</span></div>
+        <div class="mini"><strong>优点</strong><span>全局依赖建模强、并行效率高、扩展到大规模训练更自然。相比 RNN 一步步传递信息，Transformer 让每个位置都能直接看到全局，同时整个序列的计算可以并行完成，这让 GPU 的算力得到充分利用。</span></div>
+        <div class="mini"><strong>为什么能做大模型</strong><span>因为它的核心计算适合 GPU/TPU 并行，且上下文建模能力强。训练大模型最需要的就是"算得快"和"看得远"，Transformer 恰好两样都占——注意力机制提供全局视野，矩阵运算天然适合并行加速，所以它能稳定地扩展到数十亿参数的规模。</span></div>
+        <div class="mini"><strong>限制</strong><span>标准注意力在超长序列上计算和显存开销大，因此后续有很多高效变体。注意力需要对每对 token 计算关联，序列长度翻倍，计算量就变四倍，这在处理长文档或高分辨率图像时成本很高。稀疏注意力、线性注意力等变体就是来解决这个问题的。</span></div>
+        <div class="mini"><strong>应用</strong><span>大语言模型、机器翻译、视觉 Transformer、多模态模型。从 GPT 到 BERT 到 ViT，Transformer 已经成为当前 AI 最主流的架构，覆盖了语言、视觉、语音等几乎所有模态。</span></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>Transformer 成为主流，不只是因为注意力新颖，而是它把“表达能力”和“可扩展训练”两件事同时做好了。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>Transformer 成为主流，不只是因为注意力新颖，而是它把“表达能力”和“可扩展训练”两件事同时做好了。注意力机制让模型拥有全局视野，并行计算让训练可以高效扩展，位置编码补上了顺序信息——三者缺一不可，才让大模型时代成为可能。</span></div>
     </div></section>
     <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
   </div>

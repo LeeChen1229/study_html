@@ -60,9 +60,9 @@
         <div class="plot"><div class="plot-label"><span>Boosting</span><span>多棵树顺序修错</span></div><canvas id="sequential" width="520" height="205"></canvas></div>
       </div>
       <div class="triple">
-        <div class="card"><h3>随机森林更像集体表决</h3><p>多棵树独立训练，最后再投票或平均，重点是降低方差、提高稳定性。</p></div>
-        <div class="card"><h3>Boosting 更像逐步改卷</h3><p>后一棵树总是在看前面哪里错了，所以重点是逐步降低偏差。</p></div>
-        <div class="card"><h3>为什么效果常常更强</h3><p>因为它把模型能力集中用在“最难学的部分”，往往能学出更精细的边界。</p></div>
+        <div class="card"><h3>随机森林更像集体表决</h3><p>多棵树独立训练，最后再投票或平均，重点是降低方差、提高稳定性。每棵树看到的数据和特征都是随机抽样的，所以每棵树都不太一样，但方向大致正确。把它们的结果平均起来，个别树的错误就被互相抵消了，整体更稳健。</p></div>
+        <div class="card"><h3>Boosting 更像逐步改卷</h3><p>后一棵树总是在看前面哪里错了，所以重点是逐步降低偏差。第一棵树做完后，第二棵树专门盯着第一棵树预测偏差最大的那些样本去学，第三棵树再补第二棵树的不足，依此类推。每一步都在修正上一步的残差，整体预测就越来越精准。</p></div>
+        <div class="card"><h3>为什么效果常常更强</h3><p>因为它把模型能力集中用在“最难学的部分”，往往能学出更精细的边界。随机森林每棵树各学各的，没有针对性；而 Boosting 每一步都有明确的纠错方向，所以同样数量的树，Boosting 通常能拟合得更精确。不过代价是对噪声更敏感，更容易过拟合。</p></div>
       </div>
       <div class="note"><strong>这张卡片的重点</strong><span>随机森林和 Boosting 都是树集成，但一个偏“并行稳健”，一个偏“顺序修正”。</span></div>
     </div></section>

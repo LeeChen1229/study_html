@@ -61,11 +61,11 @@
         <div class="plot"><div class="plot-label"><span>后验比较</span><span>后验大的类别获胜</span></div><canvas id="posterior" width="520" height="205"></canvas></div>
       </div>
       <div class="triple">
-        <div class="card"><h3>为什么适合文本</h3><p>词袋模型下每个词都可以看成一个特征，朴素贝叶斯天然适合把这些词频证据累积起来。</p></div>
-        <div class="card"><h3>为什么常用对数</h3><p>很多小概率相乘会很小，取对数后就能把乘法变成加法，计算更稳定。</p></div>
-        <div class="card"><h3>为什么“朴素”还能有效</h3><p>虽然独立假设粗糙，但只要各类之间的相对比较仍然合理，分类效果就可能很好。</p></div>
+        <div class="card"><h3>为什么适合文本</h3><p>词袋模型下每个词都可以看成一个特征，朴素贝叶斯天然适合把这些词频证据累积起来。比如一封邮件里同时出现"优惠""中奖""点击"，每个词都会为"垃圾邮件"这个类别增加一点支持度，最终累积出很强的判断依据。</p></div>
+        <div class="card"><h3>为什么常用对数</h3><p>很多小概率相乘会越来越小，甚至小到计算机无法精确表示，这叫下溢。取对数后就能把乘法变成加法，数值范围更合理，计算也更稳定，而且不影响最终的大小比较结果。</p></div>
+        <div class="card"><h3>为什么“朴素”还能有效</h3><p>虽然独立假设粗糙——现实中“优惠”和“中奖”显然不是独立的——但分类只关心哪个类别的后验概率更大，不需要概率值本身精确。只要各类之间的相对排序仍然合理，分类效果就可能很好。</p></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯看起来像在做概率公式推导，本质上是在做一场“每个特征分别给类别投票”的累积比较。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯看起来像在做概率公式推导，本质上是在做一场“每个特征分别给类别投票”的累积比较。先验给出起跑线，似然给出每个特征的投票力度，最后谁票多谁赢。</span></div>
     </div></section>
 
     <section class="sheet"><div class="sheet-inner">
@@ -76,12 +76,12 @@
         <div class="plot"><div class="plot-label"><span>独立假设的代价</span><span>特征强相关时会有偏差</span></div><canvas id="independence" width="520" height="205"></canvas></div>
       </div>
       <div class="mini-grid">
-        <div class="mini"><strong>优点</strong><span>训练快、实现简单、对小样本和高维稀疏特征友好。</span></div>
-        <div class="mini"><strong>限制</strong><span>特征强相关时，独立假设会让模型对真实关系表达不足。</span></div>
-        <div class="mini"><strong>常见变体</strong><span>高斯朴素贝叶斯、伯努利朴素贝叶斯、多项式朴素贝叶斯。</span></div>
-        <div class="mini"><strong>适用场景</strong><span>文本分类、情感分析、垃圾邮件过滤等需要快速基线模型的任务。</span></div>
+        <div class="mini"><strong>优点</strong><span>训练快、实现简单、对小样本和高维稀疏特征友好。即使数据量不大，也能快速给出一个合理的分类基线。</span></div>
+        <div class="mini"><strong>限制</strong><span>特征强相关时，独立假设会让模型对真实关系表达不足。比如"面积"和"价格"高度相关，朴素贝叶斯会把它们当作独立证据重复计算。</span></div>
+        <div class="mini"><strong>常见变体</strong><span>高斯朴素贝叶斯适合连续特征，伯努利朴素贝叶斯适合二值特征，多项式朴素贝叶斯适合词频计数特征。</span></div>
+        <div class="mini"><strong>适用场景</strong><span>文本分类、情感分析、垃圾邮件过滤等需要快速基线模型的任务。在特征维度高但单个样本非零特征少的场景下尤其好用。</span></div>
       </div>
-      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯不是最复杂的模型，但它经常是一个非常好的概率基线。</span></div>
+      <div class="note"><strong>这张卡片的重点</strong><span>朴素贝叶斯不是最复杂的模型，但它经常是一个非常好的概率基线。当你需要一个快速、可解释的分类起点时，它往往是最先值得尝试的方案。</span></div>
     </div></section>
     <div class="tip">建议截图方式：每张卡片单独截取，浏览器缩放保持 `100%` 或 `110%`，每张卡片本身就是 `3:4` 比例。</div>
   </div>
